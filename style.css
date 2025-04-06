@@ -80,13 +80,11 @@ footer {
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px; /* Or any size that works with your image */
+  width: 120px; /* or whatever fits your image */
+  height: auto;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: transform 0.2s ease;
 }
-
-#play-button:hover {
-  transform: translateX(-50%) scale(1.05);
-}
-
 
