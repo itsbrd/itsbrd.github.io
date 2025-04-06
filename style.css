@@ -80,6 +80,10 @@ footer {
   margin: 0;
 }
 
+.hero-gif:first-child {
+  margin-bottom: -4px;
+}
+
 #play-button {
   position: absolute;
   bottom: 2rem;
