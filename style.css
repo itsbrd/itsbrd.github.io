@@ -68,16 +68,14 @@ footer {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  transform: scale(0.5); /* 👈 scales the whole logo stack to 50% */
-  transform-origin: center;
 }
 
 
 .hero-gif {
   width: auto;
-  max-height: 50vh;
+  max-height: 25vh; /* Down from 50vh */
   object-fit: contain;
-  display: block;
+  margin: 0;
 }
 
 #play-button {
