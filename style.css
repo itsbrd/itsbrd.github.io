@@ -62,17 +62,19 @@ footer {
   pointer-events: none;
 }
 
-.hero-image {
+.hero-stack {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 100vh;
 }
 
-.hero-image img {
+.hero-gif {
   width: auto;
-  height: 100vh;
+  max-height: 50vh;
   object-fit: contain;
+  display: block;
 }
 
 #play-button {
