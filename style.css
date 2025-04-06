@@ -6,7 +6,6 @@
 }
 
 body {
-  cursor: url('poop-cursor.png'), auto;
   font-family: sans-serif;
   background: #f4f4f4;
   color: #333;
@@ -14,6 +13,7 @@ body {
   display: flex;
   flex-direction: column;
 
+  cursor: url('poop-cursor.png'), auto;
   animation: fadeIn 1s ease;
 }
 
