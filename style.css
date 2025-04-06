@@ -73,7 +73,7 @@ footer {
 
 .hero-gif {
   width: auto;
-  max-height: 25vh; /* Down from 50vh */
+  max-height: 50vh; /* Down from 50vh */
   object-fit: contain;
   margin: 0;
 }
