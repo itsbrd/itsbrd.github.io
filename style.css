@@ -68,7 +68,7 @@ footer {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  transform: scale(0.5); /* 👈 scales the whole logo stack to 50% */
+  transform: scale(1); /* 👈 scales the whole logo stack to 50% */
   transform-origin: center;
 }
 
