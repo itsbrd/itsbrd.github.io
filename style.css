@@ -108,12 +108,15 @@ body {
 #audio-player button,
 #play-pause {
   background: none;
-  border: 1px solid #fff;
-  padding: 0.5rem 1rem;
-  color: white;
+  border: none;
+  font-size: 2.2rem; /* adjust for size you want */
   cursor: pointer;
-  border-radius: 5px;
-  font-size: 1rem;
+  padding: 0;
+  margin-top: 0.5rem;
+  line-height: 1;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .playlist {
