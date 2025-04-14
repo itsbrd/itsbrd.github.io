@@ -9,11 +9,9 @@ body {
   font-family: sans-serif;
   background: #f4f4f4;
   color: #333;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-
-  cursor: url('poop-cursor.png'), auto;
+  min-height: 100vh;
   animation: fadeIn 1s ease;
 }
 
@@ -26,15 +24,6 @@ body {
 .content {
   flex: 1;
   padding: 2rem;
-}
-
-/* Footer styles */
-footer {
-  background: #ddd;
-  text-align: center;
-  padding: 0.75rem;
-  font-size: 0.8rem;
-  color: #555;
 }
 
 .background-gif {
@@ -142,6 +131,15 @@ footer {
   margin-bottom: 0.3rem;
   font-size: 1.1rem;
   color: #ff5555;
+}
+
+/* Footer styles */
+footer {
+  background: #ddd;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: #555;
 }
 
 
