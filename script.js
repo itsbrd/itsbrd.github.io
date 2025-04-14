@@ -1,3 +1,5 @@
+console.log("JS loaded!");
+
 const audio = document.getElementById('theme-audio');
 const playPause = document.getElementById('play-pause');
 const progress = document.getElementById('progress');
