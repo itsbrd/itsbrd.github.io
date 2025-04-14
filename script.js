@@ -8,7 +8,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const currentTimeEl = document.getElementById('current-time');
   const durationEl = document.getElementById('duration');
 
-  
+  const songList = [
+  { title: "PROJECT POOP", file: "theme.mp3" },
+  { title: "PROJECT PISS", file: "projectpiss.mp3" },
+  { title: "PROJECT POOP 2", file: "pp2.mp3" },
+  { title: "ALL AGAIN", file: "allagain.mp3" }
+];
+
 
   function formatTime(time) {
     const mins = Math.floor(time / 60);
