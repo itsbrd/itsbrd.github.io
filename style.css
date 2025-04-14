@@ -127,4 +127,22 @@ footer {
   font-size: 1rem;
 }
 
+.playlist {
+  margin-top: 2rem;
+  color: white;
+  font-family: monospace;
+  text-align: center;
+}
+
+.audio-wrapper {
+  margin-bottom: 1rem;
+}
+
+.audio-wrapper h4 {
+  margin-bottom: 0.3rem;
+  font-size: 1.1rem;
+  color: #ff5555;
+}
+
+
 
