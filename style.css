@@ -84,16 +84,44 @@ footer {
   margin-bottom: -300px;
 }
 
-#play-button {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px; /* or whatever fits your image */
-  height: auto;
-  background: none;
-  border: none;
-  padding: 0;
+.audio-player {
+  width: 80%;
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+  color: white;
+  font-family: monospace;
+}
+
+.timeline {
+  height: 8px;
+  background: #444;
+  margin: 10px 0;
+  position: relative;
   cursor: pointer;
 }
+
+.progress {
+  height: 100%;
+  background: #ff5555;
+  width: 0%;
+}
+
+.time-info {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+#audio-player button,
+#play-pause {
+  background: none;
+  border: 1px solid #fff;
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
 
