@@ -119,6 +119,12 @@ body {
   -webkit-appearance: none;
 }
 
+#audio-player button:hover,
+#play-pause:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
 .playlist {
   margin-top: 2rem;
   color: white;
