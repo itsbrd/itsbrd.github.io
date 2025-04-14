@@ -1,4 +1,3 @@
-/* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
@@ -20,12 +19,6 @@ body {
   to { opacity: 1; }
 }
 
-/* Main content area */
-.content {
-  flex: 1;
-  padding: 2rem;
-}
-
 .background-gif {
   position: fixed;
   top: 0;
@@ -33,7 +26,6 @@ body {
   height: 100%;
   width: 100%;
   z-index: -1;
-
   background-image: url('background.gif');
   background-size: cover;
   background-position: center;
@@ -46,7 +38,7 @@ body {
   top: 0; left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(226, 13, 13, 0.4); /* adjust transparency */
+  background: rgba(226, 13, 13, 0.4);
   z-index: -1;
   pointer-events: none;
 }
@@ -56,15 +48,15 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  transform: scale(1); /* 👈 scales the whole logo stack to 50% */
+  flex: 1;
+  transform: scale(1);
   transform-origin: center;
+  padding-top: 2rem;
 }
-
 
 .hero-gif {
   width: auto;
-  max-height: 50vh; /* Down from 50vh */
+  max-height: 50vh;
   object-fit: contain;
   margin: 0;
 }
@@ -73,13 +65,21 @@ body {
   margin-bottom: -300px;
 }
 
-.audio-player {
-  margin-top: 1rem;
-  width: 80%;
-  max-width: 600px;
-  text-align: center;
+.playlist {
+  margin-top: 2rem;
   color: white;
   font-family: monospace;
+  text-align: center;
+}
+
+.audio-wrapper {
+  margin-bottom: 2rem;
+}
+
+.audio-wrapper h4 {
+  margin-bottom: 0.3rem;
+  font-size: 1.1rem;
+  color: #ff5555;
 }
 
 .timeline {
@@ -98,51 +98,29 @@ body {
   width: 0%;
 }
 
-
 .time-info {
   font-size: 0.9rem;
   color: #ccc;
   margin-bottom: 10px;
 }
 
-#audio-player button,
-#play-pause {
+.audio-wrapper button {
   background: none;
   border: none;
-  font-size: 2.2rem; /* adjust for size you want */
+  font-size: 2.5rem;
   cursor: pointer;
   padding: 0;
-  margin-top: 0.5rem;
   line-height: 1;
   color: inherit;
   appearance: none;
   -webkit-appearance: none;
-}
-
-#audio-player button:hover,
-#play-pause:hover {
-  transform: scale(1.1);
   transition: transform 0.2s ease;
 }
 
-.playlist {
-  margin-top: 2rem;
-  color: white;
-  font-family: monospace;
-  text-align: center;
+.audio-wrapper button:hover {
+  transform: scale(1.1);
 }
 
-.audio-wrapper {
-  margin-bottom: 1rem;
-}
-
-.audio-wrapper h4 {
-  margin-bottom: 0.3rem;
-  font-size: 1.1rem;
-  color: #ff5555;
-}
-
-/* Footer styles */
 footer {
   background: #ddd;
   text-align: center;
@@ -150,6 +128,3 @@ footer {
   font-size: 0.8rem;
   color: #555;
 }
-
-
-
