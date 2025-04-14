@@ -7,6 +7,20 @@ const timeline = document.getElementById('timeline');
 const currentTimeEl = document.getElementById('current-time');
 const durationEl = document.getElementById('duration');
 
+window.addEventListener('DOMContentLoaded', () => {
+  console.log("Page loaded. JS running.");
+
+  const audio = document.getElementById('theme-audio');
+  const playPause = document.getElementById('play-pause');
+  const progress = document.getElementById('progress');
+  const timeline = document.getElementById('timeline');
+  const currentTimeEl = document.getElementById('current-time');
+  const durationEl = document.getElementById('duration');
+
+  // Continue your logic here...
+});
+
+
 function formatTime(time) {
   const mins = Math.floor(time / 60);
   const secs = Math.floor(time % 60).toString().padStart(2, '0');
