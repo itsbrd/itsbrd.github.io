@@ -2,10 +2,10 @@ window.addEventListener('DOMContentLoaded', () => {
   console.log("Page loaded. JS running.");
 
   const songList = [
-    { title: "PROJECT POOP", file: "theme.mp3" },
-    { title: "PROJECT PISS", file: "projectpiss.mp3" },
-    { title: "PROJECT POOP 2", file: "pp2.mp3" },
-    { title: "ALL AGAIN", file: "allagain.mp3" }
+    { title: "PROJECT POOP - BOBOLICENER, FREEZY", file: "theme.mp3" },
+    { title: "PROJECT PISS - HYRAMUA, KIWASI", file: "projectpiss.mp3" },
+    { title: "PROJECT POOP 2 - BOBOLICENER", file: "pp2.mp3" },
+    { title: "ALL AGAIN - HYRAMUA", file: "allagain.mp3" }
   ];
 
   const heroStack = document.querySelector('.hero-stack');
