@@ -85,9 +85,9 @@ footer {
 }
 
 .audio-player {
+  margin-top: 1rem;
   width: 80%;
   max-width: 600px;
-  margin: 2rem auto;
   text-align: center;
   color: white;
   font-family: monospace;
@@ -96,9 +96,11 @@ footer {
 .timeline {
   height: 8px;
   background: #444;
-  margin: 10px 0;
+  margin: 10px auto;
   position: relative;
   cursor: pointer;
+  width: 100%;
+  max-width: 100%;
 }
 
 .progress {
@@ -106,6 +108,7 @@ footer {
   background: #ff5555;
   width: 0%;
 }
+
 
 .time-info {
   font-size: 0.9rem;
