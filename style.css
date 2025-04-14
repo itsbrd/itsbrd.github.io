@@ -116,6 +116,8 @@ body {
   appearance: none;
   -webkit-appearance: none;
   background-color: transparent;
+  vertical-align: middle;
+
 }
 
 
