@@ -3,40 +3,40 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 🔒 Age gate check
  const ageGate = document.getElementById('age-gate');
-if (ageGate) {
-  if (localStorage.getItem('projectPoop18plus') !== 'true') {
-    ageGate.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-
-    document.getElementById('enter-btn')?.addEventListener('click', () => {
-      localStorage.setItem('projectPoop18plus', 'true');
+  if (ageGate) {
+    if (localStorage.getItem('projectPoop18plus') !== 'true') {
+      ageGate.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+  
+      document.getElementById('enter-btn')?.addEventListener('click', () => {
+        localStorage.setItem('projectPoop18plus', 'true');
+        ageGate.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        initializePlaylist(); // Only if you have this defined
+      });
+    } else {
       ageGate.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      initializePlaylist(); // Only if you have this defined
-    });
-  } else {
-    ageGate.style.display = 'none';
-    initializePlaylist?.(); // Optional chaining in case it's not defined
+      initializePlaylist?.(); // Optional chaining in case it's not defined
+    }
   }
-}
 
 
   const cam4Source = document.getElementById('cam4-source');
-const cam4Video = document.getElementById('cam4-video');
-
-if (cam4Source && cam4Video) {
-  const roll = Math.floor(Math.random() * 50) + 1;
-  const timestamp = Date.now();
-
-  if (roll === 1) {
-    cam4Source.src = 'brdcorner.mp4?v=' + timestamp;
-    console.log("👀 Secret CAM 4 activated!");
-  } else {
-    cam4Source.src = 'freezycorner.mp4?v=' + timestamp;
+  const cam4Video = document.getElementById('cam4-video');
+  
+  if (cam4Source && cam4Video) {
+    const roll = Math.floor(Math.random() * 50) + 1;
+    const timestamp = Date.now();
+  
+    if (roll === 1) {
+      cam4Source.src = 'brdcorner.mp4?v=' + timestamp;
+      console.log("👀 Secret CAM 4 activated!");
+    } else {
+      cam4Source.src = 'freezycorner.mp4?v=' + timestamp;
+    }
+  
+    cam4Video.load();
   }
-
-  cam4Video.load();
-}
 
 
   let crtInput = '';
