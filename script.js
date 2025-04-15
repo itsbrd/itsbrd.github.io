@@ -2,20 +2,24 @@ window.addEventListener('DOMContentLoaded', () => {
   console.log("Page loaded. JS running.");
 
   // 🔒 Age gate check
+ const ageGate = document.getElementById('age-gate');
+if (ageGate) {
   if (localStorage.getItem('projectPoop18plus') !== 'true') {
-    document.getElementById('age-gate').style.display = 'flex';
+    ageGate.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
     document.getElementById('enter-btn')?.addEventListener('click', () => {
       localStorage.setItem('projectPoop18plus', 'true');
-      document.getElementById('age-gate').style.display = 'none';
+      ageGate.style.display = 'none';
       document.body.style.overflow = 'auto';
-      initializePlaylist(); // Start main site after confirmation
+      initializePlaylist(); // Only if you have this defined
     });
   } else {
-    document.getElementById('age-gate').style.display = 'none';
-    initializePlaylist(); // Already confirmed — load playlist
+    ageGate.style.display = 'none';
+    initializePlaylist?.(); // Optional chaining in case it's not defined
   }
+}
+
 
   // 🎲 CAM 4 Randomizer (1 in 50 chance for alternate video)
   const cam4Video = document.getElementById('freezycorner');
