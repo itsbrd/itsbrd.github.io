@@ -41,6 +41,16 @@
 }
 
 
+#crt-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+}
+
 body {
   font-family: sans-serif;
   background: #f4f4f4;
@@ -143,15 +153,7 @@ body {
 
 
 
-#crt-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1000;
-  pointer-events: none; /* Let clicks pass through */
-}
+
 
 
 
