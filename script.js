@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   
     if (crtInput === 'crt') {
-      window.location.href = 'index2.html';
+      window.location.href = 'page2.html';
     }
   });
 
