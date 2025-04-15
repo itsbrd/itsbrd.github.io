@@ -4,6 +4,43 @@
   box-sizing: border-box;
 }
 
+#age-gate {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: black;
+  color: white;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.age-content {
+  text-align: center;
+}
+
+#enter-btn {
+  background: #ff5555;
+  color: white;
+  font-size: 1.2rem;
+  border: none;
+  padding: 1rem 2rem;
+  margin-top: 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: monospace;
+  transition: background 0.3s ease;
+}
+
+#enter-btn:hover {
+  background: #ff2222;
+}
+
+
 body {
   font-family: sans-serif;
   background: #f4f4f4;
