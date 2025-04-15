@@ -42,7 +42,7 @@ body {
   pointer-events: none;
 }
 
-.corner-video {
+.cam-container {
   position: fixed;
   width: 200px;
   height: auto;
@@ -50,9 +50,29 @@ body {
   border: 2px solid #ff5555;
   border-radius: 8px;
   box-shadow: 0 0 10px #000;
+  overflow: hidden;
 }
 
-/* Corner positions */
+.cam-container video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cam-label {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ff5555;
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Position overrides */
 .bottom-right {
   bottom: 10px;
   right: 10px;
@@ -67,6 +87,7 @@ body {
   top: 10px;
   left: 10px;
 }
+
 
 
 
