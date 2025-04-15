@@ -32,6 +32,21 @@ window.addEventListener('DOMContentLoaded', () => {
   
   cam4Video.load(); // force video to reprocess the new source
 
+  let crtInput = '';
+
+  document.addEventListener('keydown', (e) => {
+    crtInput += e.key.toLowerCase();
+  
+    // Keep it trimmed to last 3 characters
+    if (crtInput.length > 3) {
+      crtInput = crtInput.slice(-3);
+    }
+  
+    if (crtInput === 'crt') {
+      window.location.href = 'index2.html';
+    }
+  });
+
 
 
   // 🎶 Playlist builder logic
