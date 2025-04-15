@@ -47,18 +47,35 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  window.addEventListener('load', () => {
   const canvas = document.getElementById('crt-canvas');
-  if (!canvas) return; // Only run this on page2.html
+  if (!canvas) {
+    console.log("CRT canvas not found — skipping draw.");
+    return;
+  }
 
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.log("Canvas context could not be initialized.");
+    return;
+  }
+
+  // Set canvas size to match actual pixels (important!)
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
+  // Test draw
+  ctx.fillStyle = 'red';
+  ctx.fillRect(0, 0, 20, 20); // you should now SEE this
+
+  // CRT effect: draw horizontal lines every 2 pixels
   for (let y = 0; y < canvas.height; y += 2) {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 0, 20, 20);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, y, canvas.width, 1);
   }
-  
+
+  console.log("✅ CRT lines drawn on canvas.");
+});
 
 
   // 🎶 Playlist builder logic
