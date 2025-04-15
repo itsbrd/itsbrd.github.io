@@ -71,13 +71,10 @@ window.addEventListener('DOMContentLoaded', () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  // Test draw
-  ctx.fillStyle = 'red';
-  ctx.fillRect(0, 0, 20, 20); // you should now SEE this
 
   // CRT effect: draw horizontal lines every 2 pixels
   for (let y = 0; y < canvas.height; y += 2) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
     ctx.fillRect(0, y, canvas.width, 1);
   }
 
