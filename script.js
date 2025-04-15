@@ -46,6 +46,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     container.appendChild(wrapper);
 
+        // Age gate check
+    if (localStorage.getItem('projectPoop18plus') !== 'true') {
+      document.getElementById('age-gate').style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // prevent scroll behind gate
+    } else {
+      document.getElementById('age-gate').style.display = 'none';
+    }
+
     // DOM references
     const audio = wrapper.querySelector(`#${audioId}`);
     const playPause = wrapper.querySelector(`#${playPauseId}`);
@@ -88,6 +96,13 @@ window.addEventListener('DOMContentLoaded', () => {
         playPause.textContent = '▶️';
       }
     });
+
+    document.getElementById('enter-btn')?.addEventListener('click', () => {
+    localStorage.setItem('projectPoop18plus', 'true');
+    document.getElementById('age-gate').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  });
+
 
     // Reset button when finished
     audio.addEventListener('ended', () => {
