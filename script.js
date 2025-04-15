@@ -48,19 +48,17 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('crt-canvas');
-    if (!canvas) return; // Only run this on page2.html
-  
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  
-    for (let y = 0; y < canvas.height; y += 2) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Slightly transparent for CRT vibe
-      ctx.fillRect(0, y, canvas.width, 1);
-    }
-  });
+  const canvas = document.getElementById('crt-canvas');
+  if (!canvas) return; // Only run this on page2.html
+
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  for (let y = 0; y < canvas.height; y += 2) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Slightly transparent for CRT vibe
+    ctx.fillRect(0, y, canvas.width, 1);
+  }
   
 
 
