@@ -21,20 +21,23 @@ if (ageGate) {
 }
 
 
-  // 🎲 CAM 4 Randomizer (1 in 50 chance for alternate video)
-  const cam4Video = document.getElementById('freezycorner');
-  const cam4Source = document.getElementById('freezycorner');
+  const cam4Source = document.getElementById('cam4-source');
+const cam4Video = document.getElementById('cam4-video');
+
+if (cam4Source && cam4Video) {
   const roll = Math.floor(Math.random() * 50) + 1;
-  const timestamp = Date.now(); // to force refresh every time
-  
+  const timestamp = Date.now();
+
   if (roll === 1) {
     cam4Source.src = 'brdcorner.mp4?v=' + timestamp;
-    console.log("🎥 Secret CAM 4 activated!");
+    console.log("👀 Secret CAM 4 activated!");
   } else {
     cam4Source.src = 'freezycorner.mp4?v=' + timestamp;
   }
-  
-  cam4Video.load(); // force video to reprocess the new source
+
+  cam4Video.load();
+}
+
 
   let crtInput = '';
 
