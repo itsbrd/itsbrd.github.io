@@ -42,10 +42,8 @@ body {
   pointer-events: none;
 }
 
-#corner-video {
+.corner-video {
   position: fixed;
-  bottom: 10px;
-  right: 10px;
   width: 200px;
   height: auto;
   z-index: 999;
@@ -53,6 +51,23 @@ body {
   border-radius: 8px;
   box-shadow: 0 0 10px #000;
 }
+
+/* Corner positions */
+.bottom-right {
+  bottom: 10px;
+  right: 10px;
+}
+
+.top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.top-left {
+  top: 10px;
+  left: 10px;
+}
+
 
 
 .hero-stack {
