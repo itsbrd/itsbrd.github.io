@@ -17,6 +17,21 @@ window.addEventListener('DOMContentLoaded', () => {
     initializePlaylist(); // Already confirmed — load playlist
   }
 
+  // 🎲 CAM 4 Randomizer (1 in 50 chance for alternate video)
+  const cam4 = document.getElementById('freezycorner');
+  const roll = Math.floor(Math.random() * 50) + 1;
+  
+  if (roll === 1) {
+    cam4.src = 'brdcorner.mp4'; // 👈 your rare video
+    console.log("👀 Secret CAM 4 activated!");
+  } else {
+    cam4.src = 'freezycorner.mp4'; // 👈 your normal cam 4 footage
+  }
+
+  const cam4Video = document.getElementById('freezycorner');
+  cam4Video.load(); // forces video element to reload source
+
+
   // 🎶 Playlist builder logic
   function initializePlaylist() {
     const songList = [
