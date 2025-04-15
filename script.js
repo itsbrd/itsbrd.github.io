@@ -48,6 +48,23 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
 
+window.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('crt-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Set canvas size to screen size
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Draw interlace lines
+  for (let y = 0; y < canvas.height; y += 2) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // slight transparency for subtlety
+    ctx.fillRect(0, y, canvas.width, 1);
+  }
+});
+
+  
+
 
   // 🎶 Playlist builder logic
   function initializePlaylist() {
