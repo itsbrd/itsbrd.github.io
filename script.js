@@ -18,18 +18,20 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // 🎲 CAM 4 Randomizer (1 in 50 chance for alternate video)
-  const cam4 = document.getElementById('freezycorner');
+  const cam4Video = document.getElementById('cam4-video');
+  const cam4Source = document.getElementById('cam4-source');
   const roll = Math.floor(Math.random() * 50) + 1;
+  const timestamp = Date.now(); // to force refresh every time
   
   if (roll === 1) {
-    cam4.src = 'brdcorner.mp4'; // 👈 your rare video
-    console.log("👀 Secret CAM 4 activated!");
+    cam4Source.src = 'cam4-secret.mp4?v=' + timestamp;
+    console.log("🎥 Secret CAM 4 activated!");
   } else {
-    cam4.src = 'freezycorner.mp4'; // 👈 your normal cam 4 footage
+    cam4Source.src = 'cam4.mp4?v=' + timestamp;
   }
+  
+  cam4Video.load(); // force video to reprocess the new source
 
-  const cam4Video = document.getElementById('freezycorner');
-  cam4Video.load(); // forces video element to reload source
 
 
   // 🎶 Playlist builder logic
