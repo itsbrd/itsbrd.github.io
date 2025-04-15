@@ -221,9 +221,24 @@ body {
 }
 
 
+
+
 .audio-wrapper button:hover {
   transform: scale(1.1);
 }
+
+.map-wrapper {
+  max-width: 600px;
+  margin: 2rem auto 4rem auto; /* top, horizontal center, bottom padding */
+  text-align: center;
+}
+
+.map-wrapper h3 {
+  color: white;
+  font-family: monospace;
+  margin-bottom: 1rem;
+}
+
 
 footer {
   background: #ddd;
