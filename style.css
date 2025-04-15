@@ -143,6 +143,18 @@ body {
 
 
 
+#crt-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  pointer-events: none; /* Let clicks pass through */
+}
+
+
+
 .hero-stack {
   display: flex;
   flex-direction: column;
