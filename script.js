@@ -47,7 +47,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-
   const canvas = document.getElementById('crt-canvas');
   if (!canvas) return; // Only run this on page2.html
 
@@ -56,8 +55,8 @@ window.addEventListener('DOMContentLoaded', () => {
   canvas.height = window.innerHeight;
 
   for (let y = 0; y < canvas.height; y += 2) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Slightly transparent for CRT vibe
-    ctx.fillRect(0, y, canvas.width, 1);
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, 20, 20);
   }
   
 
