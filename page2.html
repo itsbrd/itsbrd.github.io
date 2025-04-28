@@ -2,32 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Page 2</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Poop Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input, button {
+      margin: 0.5rem;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 5px;
+    }
+    #messages {
+      width: 100%;
+      max-width: 600px;
+      background: #111;
+      padding: 1rem;
+      margin-top: 2rem;
+      height: 300px;
+      overflow-y: scroll;
+      border-radius: 8px;
+    }
+    .message {
+      margin-bottom: 0.5rem;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="content">
-    <h1>This is Page 2</h1>
-  </div>
-  
-  <script src="script.js"></script>
+<h1>💩 PROJECT POOP CHAT 💩</h1>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<div id="auth-area">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="signIn()">Log In</button>
+</div>
 
-  <div id="auth-area">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="signUp()">Sign Up</button>
-    <button onclick="signIn()">Log In</button>
-  </div>
-  
-  <div id="chat-area" style="display:none;">
-    <h2>Project Poop Chat 💩</h2>
-    <div id="messages"></div>
-    <input id="message-input" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
-  </div>
+<div id="chat-area" style="display:none;">
+  <div id="messages"></div>
+  <input id="message-input" placeholder="Type your poop thoughts...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
+
+async function signUp() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+  if (error) alert(error.message);
+  else alert('Signed up! Check your email to confirm.');
+}
+
+async function signIn() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+  if (error) alert(error.message);
+  else {
+    document.getElementById('auth-area').style.display = 'none';
+    document.getElementById('chat-area').style.display = 'block';
+    subscribeToMessages();
+    loadMessages();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('message-input');
+  const content = input.value;
+  const user = await supabase.auth.getUser();
+
+  if (!content) return;
+
+  const { error } = await supabase.from('messages').insert([
+    { username: user.data.user.email, content }
+  ]);
+
+  if (error) console.error(error);
+  input.value = '';
+}
+
+function subscribeToMessages() {
+  supabase
+    .channel('public:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+      const msg = payload.new;
+      displayMessage(msg);
+    })
+    .subscribe();
+}
+
+async function loadMessages() {
+  const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  data.forEach(msg => displayMessage(msg));
+}
+
+function displayMessage(msg) {
+  const el = document.createElement('div');
+  el.className = 'message';
+  el.innerText = `${msg.username}: ${msg.content}`;
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+</script>
 
 </body>
 </html>
