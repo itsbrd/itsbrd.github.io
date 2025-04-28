@@ -39,7 +39,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  let crtInput = '';
 
   document.addEventListener('keydown', (e) => {
     crtInput += e.key.toLowerCase();
@@ -74,6 +73,57 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const supabase = supabase.createClient('https://dreermkpptbjpvnojqcv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWVybWtwcHRianB2bm9qcWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NjUwNjEsImV4cCI6MjA2MTQ0MTA2MX0.aoPudT9cFmYs6h3gZv_a6TYCd46hHen5uuD1mwMxgHM');
 
+  async function signUp() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { user, error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+    if (error) alert(error.message);
+    else alert('Signed up! Check your email to confirm.');
+  }
+  
+  async function signIn() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { user, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    if (error) alert(error.message);
+    else {
+      document.getElementById('auth-area').style.display = 'none';
+      document.getElementById('chat-area').style.display = 'block';
+      subscribeToMessages();
+    }
+  }
+  
+  async function sendMessage() {
+    const input = document.getElementById('message-input');
+    const content = input.value;
+    const user = supabase.auth.user();
+    if (!content) return;
+  
+    const { error } = await supabase.from('messages').insert([
+      { username: user.email, content }
+    ]);
+  
+    if (error) console.error(error);
+    input.value = '';
+  }
+  
+  function subscribeToMessages() {
+    supabase
+      .from('messages')
+      .on('INSERT', payload => {
+        const msg = payload.new;
+        const el = document.createElement('div');
+        el.innerText = `${msg.username}: ${msg.content}`;
+        document.getElementById('messages').appendChild(el);
+      })
+      .subscribe();
+  }
 
 
   // 🎶 Playlist builder logic
