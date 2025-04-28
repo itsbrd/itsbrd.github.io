@@ -72,14 +72,8 @@ window.addEventListener('DOMContentLoaded', () => {
   canvas.height = window.innerHeight;
 
 
-  // CRT effect: draw horizontal lines every 2 pixels
-  for (let y = 0; y < canvas.height; y += 2) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-    ctx.fillRect(0, y, canvas.width, 1);
-  }
+  const supabase = supabase.createClient('https://dreermkpptbjpvnojqcv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWVybWtwcHRianB2bm9qcWN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NjUwNjEsImV4cCI6MjA2MTQ0MTA2MX0.aoPudT9cFmYs6h3gZv_a6TYCd46hHen5uuD1mwMxgHM');
 
-  console.log("✅ CRT lines drawn on canvas.");
-});
 
 
   // 🎶 Playlist builder logic
