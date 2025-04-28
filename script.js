@@ -1,24 +1,27 @@
 window.addEventListener('DOMContentLoaded', () => {
   console.log("Page loaded. JS running.");
-
+ 
   // 🔒 Age gate check
  const ageGate = document.getElementById('age-gate');
-  if (ageGate) {
-    if (localStorage.getItem('projectPoop18plus') !== 'true') {
-      ageGate.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-  
-      document.getElementById('enter-btn')?.addEventListener('click', () => {
+
+if (ageGate) {
+  if (localStorage.getItem('projectPoop18plus') !== 'true') {
+    ageGate.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const enterBtn = document.getElementById('enter-btn');
+    if (enterBtn) {
+      enterBtn.addEventListener('click', () => {
         localStorage.setItem('projectPoop18plus', 'true');
         ageGate.style.display = 'none';
         document.body.style.overflow = 'auto';
-        initializePlaylist(); // Only if you have this defined
       });
-    } else {
-      ageGate.style.display = 'none';
-      initializePlaylist?.(); // Optional chaining in case it's not defined
     }
+  } else {
+    ageGate.style.display = 'none';
+    document.body.style.overflow = 'auto';
   }
+}
 
 
   const cam4Source = document.getElementById('cam4-source');
