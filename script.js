@@ -21,6 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
 
+
   console.log("Page loaded. JS running.");
 
 
