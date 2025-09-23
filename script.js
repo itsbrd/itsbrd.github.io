@@ -1,24 +1,28 @@
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const ageGate = document.getElementById('age-gate');
   const enterBtn = document.getElementById('enter-btn');
+  const mainContent = document.getElementById('main-content');
 
-  if (!ageGate || !enterBtn) {
-    console.error('Age gate or button not found.');
-    return;
-  }
-
-  // Check if user already confirmed
-  if (localStorage.getItem('projectPoop18plus') === 'true') {
-    ageGate.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  } else {
+  const showAgeGate = () => {
     ageGate.style.display = 'flex';
+    mainContent.style.display = 'none';
     document.body.style.overflow = 'hidden';
+  };
+
+  const hideAgeGate = () => {
+    ageGate.style.display = 'none';
+    mainContent.style.display = 'block';
+    document.body.style.overflow = 'auto';
+  };
+
+  if (localStorage.getItem('projectPoop18plus') === 'true') {
+    hideAgeGate();
+  } else {
+    showAgeGate();
   }
 
-  enterBtn.addEventListener('click', () => {
+  enterBtn?.addEventListener('click', () => {
     localStorage.setItem('projectPoop18plus', 'true');
-    ageGate.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    hideAgeGate();
   });
 });
