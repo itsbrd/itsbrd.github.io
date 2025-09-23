@@ -1,21 +1,21 @@
 /* Splash screen styles */
 #age-gate {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: black;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
   z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .age-content {
-  text-align: center;
+  padding: 2rem;
+  background: #111;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px #fff;
 }
 
 #enter-btn {
@@ -37,7 +37,5 @@
 
 /* Main content styling */
 #main-content {
-  padding: 2rem;
-  text-align: center;
-  font-family: monospace;
+  display: none;
 }
