@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
   const ageGate = document.getElementById('age-gate');
   const enterBtn = document.getElementById('enter-btn');
   const mainContent = document.getElementById('main-content');
@@ -8,7 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk'                  // replace with your anon public key
   );
   
-  const showAgeGate = () => {
+    enterBtn.addEventListener('click', function () {
+    localStorage.setItem('projectPoop18plus', 'true');
+    hideAgeGate();
+  });
+
+const showAgeGate = () => {
     ageGate.style.display = 'flex';
     mainContent.style.display = 'none';
     document.body.style.overflow = 'hidden';
