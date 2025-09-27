@@ -17,6 +17,19 @@
   </div>
 </div>
 
+<div id="auth-container">
+  <h2>Login or Sign Up</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Sign Up</button>
+  <p id="auth-msg"></p>
+</div>
+
+<div id="user-area" style="display:none;">
+  <h2>Welcome, <span id="user-email"></span>!</h2>
+  <button onclick="logout()">Log Out</button>
+</div>
 
 <div class="cam-container bottom-right">
   <video autoplay muted loop playsinline>
