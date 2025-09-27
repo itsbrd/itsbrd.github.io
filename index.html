@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
-  <title>Project Poop</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Poop Auth</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <div class="auth-container">
+    <h1>Welcome to Project Poop</h1>
 
-</div>
+    <div class="form">
+      <input type="email" id="email" placeholder="Email"/>
+      <input type="password" id="password" placeholder="Password"/>
 
+      <div class="auth-buttons">
+        <button id="signup">Sign Up</button>
+        <button id="login">Log In</button>
+      </div>
 
-  <!-- Background elements -->
-  <div class="background-gif"></div>
-  <div class="background-overlay"></div>
+      <p id="status"></p>
+    </div>
+  </div>
 
-  <main class="hero-stack">
-    <img src="hero-top.gif" alt="Top Logo Animation" class="hero-gif">
-    <img src="hero-bottom.gif" alt="Bottom Logo Animation" class="hero-gif">
-    <!-- Audio players will be dynamically injected here -->
-  </main>
-
-  <footer>
-    PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
-  </footer>
-
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
