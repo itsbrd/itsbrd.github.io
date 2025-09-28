@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Project Poop — Login</title>
+  <title>Project Poop — Auth</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,7 +14,10 @@
     <form id="auth-form">
       <input type="email" id="email" placeholder="Email" required />
       <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Sign Up / Log In</button>
+      <div class="button-group">
+        <button type="button" id="signup-btn">Sign Up</button>
+        <button type="button" id="login-btn">Log In</button>
+      </div>
     </form>
 
     <div id="auth-message"></div>
@@ -28,43 +31,35 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk"
     );
 
-    const form = document.getElementById("auth-form");
+    const emailField = document.getElementById("email");
+    const passwordField = document.getElementById("password");
     const message = document.getElementById("auth-message");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    document.getElementById("signup-btn").addEventListener("click", async () => {
+      const email = emailField.value.trim();
+      const password = passwordField.value;
 
-      if (!email || !password) {
-        message.textContent = "Please enter both email and password.";
-        return;
-      }
-
-      // Sign up or log in using Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password
-      });
-
-      if (error && error.message.includes("already registered")) {
-        // Try to log in if user already exists
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        if (signInError) {
-          message.textContent = signInError.message;
-        } else {
-          message.textContent = "Logged in successfully!";
-          window.location.href = "page2.html"; // Or your dashboard page
-        }
-      } else if (error) {
-        message.textContent = error.message;
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        message.textContent = `Signup error: ${error.message}`;
       } else {
-        message.textContent = "Signup successful! Check your email.";
+        message.textContent = "Signup successful! Check your email to confirm.";
+      }
+    });
+
+    document.getElementById("login-btn").addEventListener("click", async () => {
+      const email = emailField.value.trim();
+      const password = passwordField.value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        message.textContent = `Login error: ${error.message}`;
+      } else {
+        message.textContent = "Login successful!";
+        window.location.href = "page2.html";
       }
     });
   </script>
+
 </body>
 </html>
