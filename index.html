@@ -3,25 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Supabase Email + Password Auth</title>
+  <title>Project Poop — Login</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="container">
-    <h1>Login / Sign Up</h1>
+  <div class="auth-container">
+    <h1>Welcome to Project Poop</h1>
 
-    <input type="email" id="email" placeholder="Enter your email" />
-    <input type="password" id="password" placeholder="Enter your password" />
-    
-    <div class="buttons">
-      <button id="signup">Sign Up</button>
-      <button id="login">Login</button>
-    </div>
+    <form id="auth-form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Sign Up / Log In</button>
+    </form>
 
-    <div id="status"></div>
+    <div id="auth-message"></div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabase = createClient(
+      "https://qmlhagpdfnckuufhhixu.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk"
+    );
+
+    const form = document.getElementById("auth-form");
+    const message = document.getElementById("auth-message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        message.textContent = "Please enter both email and password.";
+        return;
+      }
+
+      // Sign up or log in using Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (error && error.message.includes("already registered")) {
+        // Try to log in if user already exists
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (signInError) {
+          message.textContent = signInError.message;
+        } else {
+          message.textContent = "Logged in successfully!";
+          window.location.href = "page2.html"; // Or your dashboard page
+        }
+      } else if (error) {
+        message.textContent = error.message;
+      } else {
+        message.textContent = "Signup successful! Check your email.";
+      }
+    });
+  </script>
 </body>
 </html>
