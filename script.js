@@ -1,47 +1,39 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabaseUrl = 'https://qmlhagpdfnckuufhhixu.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const supabase = createClient(
-  "https://qmlhagpdfnckuufhhixu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk"
-);
+const status = document.getElementById('status');
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // Handle redirected hash with access token
-  if (window.location.hash.includes("access_token")) {
-    const { data, error } = await supabase.auth.getSession();
-    if (data?.session) {
-      document.getElementById("status").textContent = `Logged in as ${data.session.user.email}`;
-    } else {
-      console.error("Session fetch error:", error);
-    }
+document.getElementById('signup').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    status.innerText = `Sign up failed: ${error.message}`;
+  } else {
+    status.innerText = 'Sign up successful! Please check your email to verify.';
   }
+});
 
-  // Sign-up button handler
-  const signupBtn = document.getElementById("signup");
-  if (signupBtn) {
-    signupBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const { error } = await supabase.auth.signUp({ email });
-      if (error) {
-        alert("Signup error: " + error.message);
-      } else {
-        alert("Check your email for a magic login link.");
-      }
-    });
-  }
+document.getElementById('login').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-  // Login button handler
-  const loginBtn = document.getElementById("login");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      if (error) {
-        alert("Login error: " + error.message);
-      } else {
-        alert("Check your email for a magic login link.");
-      }
-    });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    status.innerText = `Login failed: ${error.message}`;
+  } else {
+    status.innerText = `Logged in as ${data.user.email}`;
   }
 });
