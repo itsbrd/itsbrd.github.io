@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Project Poop Auth</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>Supabase Email Auth</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="auth-container">
-    <h1>Welcome to Project Poop</h1>
 
-    <input type="email" id="email" placeholder="Email"/>
-    <input type="password" id="password" placeholder="Password"/>
+  <div class="container">
+    <h1>Login / Sign Up</h1>
 
-    <div class="auth-buttons">
+    <input type="email" id="email" placeholder="Enter your email" />
+    
+    <div class="buttons">
       <button id="signup">Sign Up</button>
-      <button id="login">Log In</button>
+      <button id="login">Login</button>
     </div>
 
-    <p id="status"></p>
+    <div id="status"></div>
   </div>
 
-  <!-- Load our JS -->
+  <!-- Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
