@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+  
+<canvas id="scanlines" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;"></canvas>
 
 <head> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,5 +26,30 @@
   </footer>
 
   <script src="script.js"></script>
+  
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      ctx.clearRect(0, 0, width, height);
+      
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // opacity tweakable
+      
+      for (let y = 0; y < height; y += 2) {
+        ctx.fillRect(0, y, width, 1);
+      }
+    }
+    
+    // Draw scanlines initially and on resize
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
+  
 </body>
 </html>
