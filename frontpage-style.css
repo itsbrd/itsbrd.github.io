@@ -60,10 +60,6 @@ body {
   margin: 0;
 }
 
-.hero-gif:first-child {
-  margin-bottom: -300px;
-}
-
 .playlist {
   margin-top: 2rem;
   color: white;
