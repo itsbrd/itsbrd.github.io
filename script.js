@@ -37,3 +37,39 @@ document.getElementById('login').addEventListener('click', async () => {
     status.innerText = `Logged in as ${data.user.email}`;
   }
 });
+
+const { data: { user } } = await supabase.auth.getUser();
+
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient('https://your-project.supabase.co', 'public-anon-key')
+
+// Run this after auth
+async function createAccountRowIfNeeded(user) {
+  const { data, error } = await supabase
+  .from('accounts')
+  .select('id')
+  .eq('id', user.id)
+  .single();
+  
+  if (!data && !error) {
+    await supabase.from('accounts').insert({
+      id: user.id,
+      email: user.email,
+      songsfound: 0
+    });
+  }
+}
+
+async function loadSongsFound() {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase
+  .from('accounts')
+  .select('songsfound')
+  .eq('id', user.id)
+  .single();
+  
+  if (data && !error) {
+    document.getElementById('songs-found').textContent = `Songs Found: ${data.songsfound}/52`;
+  }
+}
