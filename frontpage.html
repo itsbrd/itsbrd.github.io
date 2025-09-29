@@ -22,6 +22,11 @@
     <!-- Audio players will be dynamically injected here -->
   </main>
   
+  <script type="module">
+    import { loadSongsFound } from './script.js';
+    loadSongsFound();
+  </script>
+  
   <div id="songs-found">Songs Found: 0/52</div>
 
   <footer>

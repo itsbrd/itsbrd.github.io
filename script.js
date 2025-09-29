@@ -1,56 +1,37 @@
-// Only import ONCE at the top
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabaseUrl = 'https://qmlhagpdfnckuufhhixu.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // truncated for safety
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient('https://qmlhagpdfnckuufhhixu.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk');
 
-// Auth buttons
-document.addEventListener("DOMContentLoaded", () => {
-  const signupBtn = document.getElementById('signup');
-  const loginBtn = document.getElementById('login');
-  const status = document.getElementById('status');
+const status = document.getElementById('status');
 
-  if (signupBtn) {
-    signupBtn.addEventListener('click', async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+document.getElementById('signup')?.addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
-      if (error) {
-        status.innerText = `Sign up failed: ${error.message}`;
-      } else {
-        status.innerText = 'Sign up successful! Please check your email to verify.';
-        await createAccountRowIfNeeded(data.user);
-      }
-    });
-  }
-
-  if (loginBtn) {
-    loginBtn.addEventListener('click', async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        status.innerText = `Login failed: ${error.message}`;
-      } else {
-        status.innerText = `Logged in as ${data.user.email}`;
-        await createAccountRowIfNeeded(data.user);
-        window.location.href = "frontpage.html"; // redirect after login
-      }
-    });
-  }
-
-  // Auto-load songs if on frontpage
-  if (document.getElementById('songs-found')) {
-    loadSongsFound();
+  if (error) {
+    status.innerText = `Sign up failed: ${error.message}`;
+  } else {
+    status.innerText = 'Sign up successful! Check your email.';
   }
 });
 
-// Ensure account row exists
+document.getElementById('login')?.addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    status.innerText = `Login failed: ${error.message}`;
+  } else {
+    status.innerText = `Logged in as ${data.user.email}`;
+    await createAccountRowIfNeeded(data.user);
+    window.location.href = 'frontpage.html';
+  }
+});
+
 async function createAccountRowIfNeeded(user) {
   const { data, error } = await supabase
     .from('accounts')
@@ -59,19 +40,27 @@ async function createAccountRowIfNeeded(user) {
     .single();
 
   if (!data && !error) {
-    await supabase.from('accounts').insert({
-      id: user.id,
-      email: user.email,
-      songsfound: 0
-    });
+    await supabase
+      .from('accounts')
+      .insert({
+        id: user.id,
+        email: user.email,
+        songsfound: 0
+      });
   }
 }
 
-// Display songs found
-async function loadSongsFound() {
-  const { data: { user } } = await supabase.auth.getUser();
+// Called in frontpage.html
+export async function loadSongsFound() {
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser();
 
-  if (!user) return;
+  if (!user || authError) {
+    console.error('No authenticated user.');
+    return;
+  }
 
   const { data, error } = await supabase
     .from('accounts')
@@ -80,7 +69,6 @@ async function loadSongsFound() {
     .single();
 
   if (data && !error) {
-    document.getElementById('songs-found').textContent =
-      `Songs Found: ${data.songsfound}/52`;
+    document.getElementById('songs-found').textContent = `Songs Found: ${data.songsfound}/52`;
   }
 }
