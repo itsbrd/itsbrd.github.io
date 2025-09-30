@@ -2,11 +2,12 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://qmlhagpdfnckuufhhixu.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk' // replace with actual key
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk'
 );
 
 const status = document.getElementById('status');
 
+// Handle signup
 document.getElementById('signup')?.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -17,9 +18,12 @@ document.getElementById('signup')?.addEventListener('click', async () => {
     status.innerText = `Sign up failed: ${error.message}`;
   } else {
     status.innerText = 'Sign up successful! Check your email.';
+    // Insert into accounts table right away
+    await createAccountRowIfNeeded({ email });
   }
 });
 
+// Handle login
 document.getElementById('login')?.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -36,11 +40,13 @@ document.getElementById('login')?.addEventListener('click', async () => {
 });
 
 async function createAccountRowIfNeeded(user) {
-  // Check if account row exists for this email
+  // user here can be {email: "..."} if called from signup, or full user object from login
+  const email = user.email;
+
   const { data, error } = await supabase
     .from('accounts')
     .select('email')
-    .eq('email', user.email);
+    .eq('email', email);
 
   if (error) {
     console.error("Failed to check accounts table:", error);
@@ -48,11 +54,10 @@ async function createAccountRowIfNeeded(user) {
   }
 
   if (!data || data.length === 0) {
-    // If no row exists, insert one
     const { error: insertError } = await supabase
       .from('accounts')
       .insert({
-        email: user.email,
+        email: email,
         songsfound: 0
       });
 
@@ -77,7 +82,7 @@ export async function loadSongsFound() {
   const { data, error } = await supabase
     .from('accounts')
     .select('songsfound')
-    .eq('email', user.email); // Don't use .single()
+    .eq('email', user.email);
 
   if (error) {
     console.error('Error loading songsfound:', error);
