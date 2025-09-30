@@ -1,124 +1,46 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+// script.js
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
-  'https://qmlhagpdfnckuufhhixu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true
-    }
-  }
+  'https://qmlhagpdfnckuufhhixu.supabase.co', // replace this!
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk'             // replace this!
 );
 
-const status = document.getElementById('status');
-
-// ---------- SIGN UP ----------
-document.getElementById('signup')?.addEventListener('click', async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  const { data, error } = await supabase.auth.signUp({ email, password });
-
-  if (error) {
-    status.innerText = `Sign up failed: ${error.message}`;
-    return;
-  }
-
-  status.innerText = 'Sign up successful! Check your email.';
-  console.log("[Signup] Auth data:", data);
-
-  const { data: sessionData } = await supabase.auth.getSession();
-  const userEmail = sessionData?.session?.user?.email;
-
-  if (userEmail) {
-    await createAccountRowIfNeeded(userEmail);
-  } else {
-    console.warn("[Signup] Could not get email after signup.");
-  }
-});
-
-// ---------- LOGIN ----------
-document.getElementById('login')?.addEventListener('click', async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    status.innerText = `Login failed: ${error.message}`;
-    return;
-  }
-
-  status.innerText = `Logged in as ${data.user.email}`;
-  console.log("[Login] Logged in user:", data.user.email);
-
-  await createAccountRowIfNeeded(data.user.email);
-  window.location.href = 'frontpage.html';
-});
-
-// ---------- CREATE ACCOUNT IF NOT EXISTS ----------
-async function createAccountRowIfNeeded(email) {
-  if (!email) {
-    console.error("[CreateRow] No valid email");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from('accounts')
-    .select('id')
-    .eq('email', email);
-
-  if (error) {
-    console.error("[CreateRow] Error selecting:", error);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    const { error: insertError } = await supabase
-      .from('accounts')
-      .insert({ email, songsfound: 0 });
-
-    if (insertError) {
-      console.error("[CreateRow] Insert error:", insertError);
-    } else {
-      console.log("[CreateRow] Inserted account row for", email);
-    }
-  } else {
-    console.log("[CreateRow] Account already exists for", email);
-  }
-}
-
-// ---------- LOAD SONGS FOUND ----------
 export async function loadSongsFound() {
-  console.log("[LoadSongs] Starting...");
+  console.log('[LoadSongs] Starting...');
 
-  const { data: userData, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabase.auth.getSession();
 
-  if (authError || !userData?.user) {
-    console.warn("[LoadSongs] No authenticated user:", authError?.message);
+  if (sessionError || !session) {
+    console.warn('[LoadSongs] No authenticated user:');
+    console.warn(sessionError);
     return;
   }
 
-  const email = userData.user.email;
-  console.log("[LoadSongs] Authenticated email:", email);
+  const email = session.user.email;
+  console.log('[LoadSongs] Authenticated email: –', `%c"${email}"`, 'color:red');
 
-  const { data, error } = await supabase
+  // Check if account row exists
+  const { data: accounts, error: accountError } = await supabase
     .from('accounts')
-    .select('songsfound')
-    .eq('email', email);
+    .select('*')
+    .eq('email', email)
+    .single();
 
-  if (error) {
-    console.error("[LoadSongs] DB error:", error);
+  if (accountError) {
+    console.warn('[LoadSongs] No account row found for this user.');
+    console.warn(accountError);
     return;
   }
 
-  if (data.length > 0) {
-    const count = data[0].songsfound;
-    document.getElementById('songs-found').textContent = `Songs Found: ${count}/52`;
-    console.log(`[LoadSongs] Found ${count} songs for ${email}`);
-  } else {
-    document.getElementById('songs-found').textContent = `Songs Found: 0/52`;
-    console.warn("[LoadSongs] No account row found for this user.");
+  const songsFound = accounts.songsfound ?? 0;
+  console.log(`[LoadSongs] Songs found: ${songsFound}`);
+
+  const songsDiv = document.getElementById('songs-found');
+  if (songsDiv) {
+    songsDiv.textContent = `Songs Found: ${songsFound}/52`;
   }
 }
