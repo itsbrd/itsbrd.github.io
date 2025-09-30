@@ -5,44 +5,46 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtbGhhZ3BkZm5ja3V1ZmhoaXh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMTEzMTIsImV4cCI6MjA3NDU4NzMxMn0.HFrgVdnETfPL6EDa9lrj0SwZkEFehMbDUjvkq7VkRTk'
 );
 
-document.getElementById('signup-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+// Handle Signup
+const signupForm = document.getElementById('signup-form');
+if (signupForm) {
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      console.error('Signup error:', error.message);
+      alert(`Signup error: ${error.message}`);
+    } else {
+      alert('Signup successful! Please check your email to confirm your account.');
+      console.log('Signup data:', data);
+      // window.location.href = '/dashboard.html'; // optional redirect
+    }
   });
+}
 
-  if (error) {
-    console.error('Signup error:', error.message);
-    alert(`Signup error: ${error.message}`);
-    return;
-  }
+// Handle Login
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  alert('Signup successful! Please check your email to confirm your account.');
-  console.log('Signup data:', data);
-});
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
 
-document.getElementById('login-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
+    if (error) {
+      console.error('Login error:', error.message);
+      alert(`Login error: ${error.message}`);
+    } else {
+      alert('Login successful!');
+      console.log('Login data:', data);
+      // window.location.href = '/dashboard.html'; // optional redirect
+    }
   });
-
-  if (error) {
-    console.error('Login error:', error.message);
-    alert(`Login error: ${error.message}`);
-    return;
-  }
-
-  alert('Login successful!');
-  console.log('Login data:', data);
-});
+}
