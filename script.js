@@ -12,32 +12,18 @@ document.getElementById('signup')?.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
 
-  console.log("[SignUp] Attempting sign up with:", email);
   const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    console.error("[SignUp] Error:", error);
     status.innerText = `Sign up failed: ${error.message}`;
     return;
   }
 
   status.innerText = 'Sign up successful! Check your email.';
-  console.log("[SignUp] Sign up successful:", data);
+  console.log('[SignUp] Sign up complete:', data);
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  const userEmail = sessionData?.session?.user?.email;
-
-  console.log("[SignUp] Retrieved session email:", userEmail);
-
-  if (sessionError) {
-    console.error("[SignUp] Session fetch error:", sessionError);
-  }
-
-  if (userEmail) {
-    await createAccountRowIfNeeded(userEmail);
-  } else {
-    console.warn("[SignUp] Could not fetch user email after sign-up.");
-  }
+  // Do NOT try to get session — it won’t exist until email is confirmed
+  // Row will be created after login
 });
 
 // ---------- LOGIN ----------
@@ -45,71 +31,65 @@ document.getElementById('login')?.addEventListener('click', async () => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
 
-  console.log("[Login] Attempting login for:", email);
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    console.error("[Login] Error:", error);
     status.innerText = `Login failed: ${error.message}`;
     return;
   }
 
   status.innerText = `Logged in as ${data.user.email}`;
-  console.log("[Login] Login successful:", data.user.email);
+  console.log('[Login] Logged in user:', data.user);
 
   await createAccountRowIfNeeded(data.user.email);
+
   window.location.href = 'frontpage.html';
 });
 
 // ---------- CREATE ACCOUNT ROW ----------
 async function createAccountRowIfNeeded(email) {
-  if (!email) {
-    console.error("[CreateRow] No valid email provided.");
-    return;
-  }
+  console.log('[CreateRow] Checking row for email:', email);
 
-  console.log("[CreateRow] Checking if account exists for:", email);
   const { data, error } = await supabase
     .from('accounts')
     .select('id')
     .eq('email', email);
 
   if (error) {
-    console.error("[CreateRow] Error checking table:", error);
+    console.error('[CreateRow] Select error:', error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    console.log("[CreateRow] No row found, inserting new account for:", email);
+  if (data.length === 0) {
+    console.log('[CreateRow] No row found. Creating...');
 
-    const { error: insertError } = await supabase
+    const { error: insertError, data: insertData } = await supabase
       .from('accounts')
       .insert({ email, songsfound: 0 });
 
     if (insertError) {
-      console.error("[CreateRow] Insert error:", insertError);
+      console.error('[CreateRow] Insert error:', insertError);
     } else {
-      console.log("[CreateRow] New account row inserted.");
+      console.log('[CreateRow] Row inserted:', insertData);
     }
   } else {
-    console.log("[CreateRow] Account already exists.");
+    console.log('[CreateRow] Row already exists:', data);
   }
 }
 
 // ---------- LOAD SONGS FOUND ----------
 export async function loadSongsFound() {
-  console.log("[LoadSongs] Starting...");
+  console.log('[LoadSongs] Starting...');
 
   const { data: userData, error: authError } = await supabase.auth.getUser();
-  const user = userData?.user;
 
-  if (!user || authError) {
-    console.error('[LoadSongs] No user or auth error:', authError);
+  if (authError || !userData?.user?.email) {
+    console.error('[LoadSongs] No authenticated user or error:', authError);
     return;
   }
 
-  const email = user.email;
-  console.log("[LoadSongs] Authenticated email:", email);
+  const email = userData.user.email;
+  console.log('[LoadSongs] Authenticated email: –', email);
 
   const { data, error } = await supabase
     .from('accounts')
@@ -117,16 +97,15 @@ export async function loadSongsFound() {
     .eq('email', email);
 
   if (error) {
-    console.error('[LoadSongs] DB error:', error);
+    console.error('[LoadSongs] Error loading songsfound:', error);
     return;
   }
 
-  if (!data || data.length === 0) {
+  if (data.length > 0) {
+    document.getElementById('songs-found').textContent = `Songs Found: ${data[0].songsfound}/52`;
+    console.log('[LoadSongs] Loaded:', data[0].songsfound);
+  } else {
     console.warn('[LoadSongs] No account row found for this user.');
     document.getElementById('songs-found').textContent = `Songs Found: 0/52`;
-    return;
   }
-
-  console.log('[LoadSongs] Row found:', data[0]);
-  document.getElementById('songs-found').textContent = `Songs Found: ${data[0].songsfound}/52`;
 }
