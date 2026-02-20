@@ -1,6 +1,7 @@
 // Local song progress
 let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 
+
 // Song List
 const songList = [
   { title: "PROJECT POOP", file: "theme.mp3" },
@@ -20,10 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Update counter
 function updateSongsFound() {
+
   document.getElementById("songs-found").textContent =
     `Songs Found: ${songsFound}/52`;
 
   localStorage.setItem("pp_songsfound", songsFound);
+
 }
 
 
@@ -38,7 +41,7 @@ function buildPlaylist() {
   heroStack.appendChild(container);
 
 
-  songList.forEach((song, index) => {
+  songList.forEach((song) => {
 
     const wrapper = document.createElement("div");
     wrapper.className = "audio-wrapper";
@@ -148,7 +151,7 @@ function formatTime(time) {
 }
 
 
-// Resize safety for background
+// Resize safety
 window.addEventListener("resize", () => {
 
   const bg = document.querySelector(".background-gif");
