@@ -1,63 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-  
-  
-<canvas id="scanlines" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;"></canvas>
-
-<head> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Project Poop</title>
   <link rel="stylesheet" href="frontpage-style.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-  
-  <!-- Background elements -->
+
+  <!-- CRT scanlines overlay -->
+  <canvas id="scanlines"></canvas>
+
+  <!-- Background -->
   <div class="background-gif"></div>
   <div class="background-overlay"></div>
 
   <main class="hero-stack">
-    <img src="hero-top.gif" alt="Top Logo Animation" class="hero-gif">
-    <!-- Audio players will be dynamically injected here -->
+    <img src="hero-top.gif" alt="Project Poop" class="hero-gif">
+    <!-- Playlist injected by script.js -->
   </main>
-  
-  <script type="module">
-    import { loadSongsFound } from './script.js';
-    loadSongsFound();
-  </script>
-  
+
   <div id="songs-found">Songs Found: 0/52</div>
 
   <footer>
     PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
   </footer>
 
-  <script type="module" src="script.js"></script>
-  
-  <script>
-    function drawScanlines() {
-      const canvas = document.getElementById('scanlines');
-      const ctx = canvas.getContext('2d');
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      ctx.clearRect(0, 0, width, height);
-      
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // opacity tweakable
-      
-      for (let y = 0; y < height; y += 2) {
-        ctx.fillRect(0, y, width, 1);
-      }
-    }
-    
-    // Draw scanlines initially and on resize
-    window.addEventListener('load', drawScanlines);
-    window.addEventListener('resize', drawScanlines);
-  </script>
-  
+  <script src="script.js" defer></script>
 </body>
 </html>
