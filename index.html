@@ -1,62 +1,71 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music</title>
+  <style>
+    :root {
+      --max: 780px;
+    }
 
-  <title>Project Poop</title>
+    body {
+      margin: 0;
+      padding: 24px 16px 48px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.35;
+    }
 
-  <link rel="stylesheet" href="frontpage-style.css" />
-  <link rel="icon" href="favicon.ico" />
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+
+    /* Album cover */
+    .cover {
+      width: 100%;
+      max-width: 560px;
+      display: block;
+      margin: 0 auto 18px;
+      border-radius: 12px;
+    }
+
+    /* Song list */
+    .song-row {
+      margin: 0 0 16px;
+      padding: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 12px;
+    }
+
+    .song-title {
+      font-weight: 650;
+      margin: 0 0 8px;
+      overflow-wrap: anywhere;
+    }
+
+    audio {
+      width: 100%;
+    }
+
+    #status {
+      opacity: 0.75;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
+    <!-- Album cover (root/cover.jpg) -->
+    <img class="cover" src="./cover.jpg" alt="Album cover" />
 
-  <!-- Background -->
-  <div class="background-gif"></div>
-  <div class="background-overlay"></div>
+    <!-- Songs get injected here -->
+    <div id="song-list"></div>
+    <div id="status"></div>
+  </div>
 
-  <!-- Scanlines -->
-  <canvas id="scanlines"></canvas>
-
-  <!-- Main Content -->
-  <main class="hero-stack">
-    <!-- Playlist injected here -->
-  </main>
-
-  <!-- Songs Found -->
-  <div id="songs-found">Songs Found: 0/52</div>
-
-  <!-- Footer -->
-  <footer>
-    PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
-  </footer>
-
-  <!-- Scripts -->
-  <script type="module" src="script.js"></script>
-
-  <!-- Scanline Drawing -->
-  <script>
-    function drawScanlines() {
-      const canvas = document.getElementById("scanlines");
-      const ctx = canvas.getContext("2d");
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "rgba(0,0,0,0.6)";
-
-      for (let y = 0; y < canvas.height; y += 2) {
-        ctx.fillRect(0, y, canvas.width, 1);
-      }
-    }
-
-    window.addEventListener("load", drawScanlines);
-    window.addEventListener("resize", drawScanlines);
-  </script>
-
+  <script src="./songs.js"></script>
 </body>
 </html>
