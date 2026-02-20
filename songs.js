@@ -1,8 +1,8 @@
 // ====== CONFIG ======
 // Set these to match your GitHub repo:
-const GITHUB_OWNER  = "YOUR_GITHUB_USERNAME";
-const GITHUB_REPO   = "YOUR_REPO_NAME";
-const GITHUB_BRANCH = "main";     // change to "master" if needed
+const GITHUB_OWNER  = "itsbrd";
+const GITHUB_REPO   = "itsbrd.github.com";
+const GITHUB_BRANCH = "master";   // <-- now set to master
 const SONGS_PATH    = "songs";    // folder containing .wav files
 
 // If you have subfolders inside /songs and want recursive search, set true:
@@ -70,7 +70,6 @@ async function findWavsInDir(path) {
 
   for (const item of items) {
     if (item.type === "file" && /\.wav$/i.test(item.name)) {
-      // download_url is a raw URL perfect for <audio src="">
       if (item.download_url) {
         wavFiles.push({
           title: filenameToTitle(item.name),
@@ -99,8 +98,9 @@ async function loadSongs() {
 
   const wavs = await findWavsInDir(SONGS_PATH);
 
-  // Sort A→Z by filename (optional)
-  wavs.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  wavs.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true })
+  );
 
   if (!wavs.length) {
     setStatus("No .wav files found in /songs.");
