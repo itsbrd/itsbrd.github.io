@@ -1,8 +1,8 @@
 // ====== CONFIG ======
 // Set these to match your GitHub repo:
 const GITHUB_OWNER  = "itsbrd";
-const GITHUB_REPO   = "itsbrd.github.com";
-const GITHUB_BRANCH = "master";   // <-- now set to master
+const GITHUB_REPO   = "itsbrd.github.io";
+const GITHUB_BRANCH = "main";   // <-- now set to master
 const SONGS_PATH    = "songs";    // folder containing .wav files
 
 // If you have subfolders inside /songs and want recursive search, set true:
