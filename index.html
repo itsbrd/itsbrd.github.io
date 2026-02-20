@@ -1,32 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Poop</title>
-  <link rel="stylesheet" href="frontpage-style.css">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
 
-  <!-- CRT scanlines overlay -->
-  <canvas id="scanlines"></canvas>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Project Poop</title>
+
+  <link rel="stylesheet" href="frontpage-style.css" />
+  <link rel="icon" href="favicon.ico" />
+</head>
+
+<body>
 
   <!-- Background -->
   <div class="background-gif"></div>
   <div class="background-overlay"></div>
 
+  <!-- Scanlines -->
+  <canvas id="scanlines"></canvas>
+
+  <!-- Main Content -->
   <main class="hero-stack">
-    <img src="hero-top.gif" alt="Project Poop" class="hero-gif">
-    <!-- Playlist injected by script.js -->
+    <!-- Playlist injected here -->
   </main>
 
+  <!-- Songs Found -->
   <div id="songs-found">Songs Found: 0/52</div>
 
+  <!-- Footer -->
   <footer>
     PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
   </footer>
 
-  <script src="script.js" defer></script>
+  <!-- Scripts -->
+  <script type="module" src="script.js"></script>
+
+  <!-- Scanline Drawing -->
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById("scanlines");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+
+      for (let y = 0; y < canvas.height; y += 2) {
+        ctx.fillRect(0, y, canvas.width, 1);
+      }
+    }
+
+    window.addEventListener("load", drawScanlines);
+    window.addEventListener("resize", drawScanlines);
+  </script>
+
 </body>
 </html>
