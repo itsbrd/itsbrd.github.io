@@ -1,52 +1,23 @@
-// Local song progress
-let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
-
-
-// Song List
-const songList = [
-  { title: "PROJECT POOP", file: "theme.mp3" },
-  { title: "PROJECT PISS", file: "projectpiss.mp3" },
-  { title: "PROJECT POOP 2", file: "pp2.mp3" },
-  { title: "ALL AGAIN", file: "allagain.mp3" }
-];
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
-  updateSongsFound();
-  buildPlaylist();
-
-});
+  const container = document.querySelector(".hero-stack");
 
 
-// Update counter
-function updateSongsFound() {
-
-  document.getElementById("songs-found").textContent =
-    `Songs Found: ${songsFound}/52`;
-
-  localStorage.setItem("pp_songsfound", songsFound);
-
-}
+  function formatTime(t) {
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  }
 
 
-// Build players
-function buildPlaylist() {
+  songs.forEach((song, i) => {
 
-  const heroStack = document.querySelector(".hero-stack");
-
-  const container = document.createElement("div");
-  container.className = "playlist";
-
-  heroStack.appendChild(container);
+    const wrap = document.createElement("div");
+    wrap.className = "audio-wrapper";
 
 
-  songList.forEach((song) => {
+    wrap.innerHTML = `
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "audio-wrapper";
-
-    wrapper.innerHTML = `
       <h4>${song.title}</h4>
 
       <audio src="${song.file}"></audio>
@@ -55,110 +26,78 @@ function buildPlaylist() {
         <div class="progress"></div>
       </div>
 
-      <div class="time-info">
-        <span class="current">0:00</span> /
-        <span class="duration">0:00</span>
+      <div class="controls">
+
+        <button class="play-btn">▶️</button>
+
+        <div class="time">
+          <span class="cur">0:00</span> /
+          <span class="dur">0:00</span>
+        </div>
+
       </div>
 
-      <button>▶️</button>
     `;
 
-    container.appendChild(wrapper);
+
+    container.appendChild(wrap);
 
 
-    const audio = wrapper.querySelector("audio");
-    const button = wrapper.querySelector("button");
-
-    const timeline = wrapper.querySelector(".timeline");
-    const progress = wrapper.querySelector(".progress");
-
-    const current = wrapper.querySelector(".current");
-    const duration = wrapper.querySelector(".duration");
+    const audio = wrap.querySelector("audio");
+    const play = wrap.querySelector(".play-btn");
+    const progress = wrap.querySelector(".progress");
+    const timeline = wrap.querySelector(".timeline");
+    const cur = wrap.querySelector(".cur");
+    const dur = wrap.querySelector(".dur");
 
 
-    // Metadata
     audio.addEventListener("loadedmetadata", () => {
-      duration.textContent = formatTime(audio.duration);
+      dur.textContent = formatTime(audio.duration);
     });
 
 
-    // Progress
     audio.addEventListener("timeupdate", () => {
 
-      const percent =
-        (audio.currentTime / audio.duration) * 100;
+      const pct = (audio.currentTime / audio.duration) * 100;
 
-      progress.style.width = percent + "%";
+      progress.style.width = pct + "%";
 
-      current.textContent = formatTime(audio.currentTime);
-
-    });
-
-
-    // Seek
-    timeline.addEventListener("click", (e) => {
-
-      const rect = timeline.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-
-      const percent = x / rect.width;
-
-      audio.currentTime = percent * audio.duration;
+      cur.textContent = formatTime(audio.currentTime);
 
     });
 
 
-    // Play / Pause
-    button.addEventListener("click", () => {
+    timeline.addEventListener("click", e => {
+
+      const x = e.offsetX / timeline.offsetWidth;
+
+      audio.currentTime = x * audio.duration;
+
+    });
+
+
+    play.addEventListener("click", () => {
 
       document.querySelectorAll("audio").forEach(a => {
         if (a !== audio) a.pause();
       });
 
-      document.querySelectorAll(".audio-wrapper button")
-        .forEach(b => b.textContent = "▶️");
-
 
       if (audio.paused) {
         audio.play();
-        button.textContent = "⏸️";
+        play.textContent = "⏸️";
       } else {
         audio.pause();
-        button.textContent = "▶️";
+        play.textContent = "▶️";
       }
 
     });
 
 
-    // Finished
     audio.addEventListener("ended", () => {
-      button.textContent = "▶️";
+      play.textContent = "▶️";
     });
 
   });
-
-}
-
-
-// Format time
-function formatTime(time) {
-
-  const min = Math.floor(time / 60);
-  const sec = Math.floor(time % 60).toString().padStart(2, "0");
-
-  return `${min}:${sec}`;
-
-}
-
-
-// Resize safety
-window.addEventListener("resize", () => {
-
-  const bg = document.querySelector(".background-gif");
-
-  if (bg) {
-    bg.style.width = "100vw";
-    bg.style.height = "100vh";
-  }
 
 });
