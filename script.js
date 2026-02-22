@@ -12,6 +12,7 @@ const SONGS_FOLDER = "songs";
 // This will be filled dynamically
 let songList = [];
 
+
 document.addEventListener("DOMContentLoaded", async () => {
   drawScanlines();
   window.addEventListener("resize", drawScanlines);
