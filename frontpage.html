@@ -1,69 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0; url=./index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <title>Project Poop</title>
-
-  <link rel="stylesheet" href="frontpage-style.css">
-  <link rel="icon" href="favicon.ico">
-
 </head>
-
 <body>
-
-  <!-- CRT Scanlines -->
-  <canvas id="scanlines"></canvas>
-
-  <!-- Background -->
-  <div class="background-gif"></div>
-
-  <!-- Songs Found -->
-  <div id="songs-found">Songs Found: 0/52</div>
-
-  <!-- Main Content -->
-  <main class="hero-stack">
-
-    <!-- Players injected here -->
-    
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. ©2026
-  </footer>
-
-
-  <!-- Player Logic -->
-  <script src="songs.js"></script>
-  <script src="script.js"></script>
-
-  <!-- CRT Scanlines -->
-  <script>
-    function drawScanlines() {
-      const canvas = document.getElementById("scanlines");
-      const ctx = canvas.getContext("2d");
-
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      canvas.width = w;
-      canvas.height = h;
-
-      ctx.clearRect(0, 0, w, h);
-
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-
-      for (let y = 0; y < h; y += 2) {
-        ctx.fillRect(0, y, w, 1);
-      }
-    }
-
-    window.addEventListener("load", drawScanlines);
-    window.addEventListener("resize", drawScanlines);
-  </script>
-
+  <p>Redirecting… If you are not redirected, <a href="./index.html">click here</a>.</p>
 </body>
 </html>

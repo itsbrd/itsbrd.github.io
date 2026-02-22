@@ -1,103 +1,143 @@
+// ===== Project Poop (no Supabase) =====
+
+// Local song progress (optional)
+let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
+
+// Your songs (edit names/files here)
+const songList = [
+  { title: "PROJECT POOP", file: "theme.mp3" },
+  { title: "PROJECT PISS", file: "projectpiss.mp3" },
+  { title: "PROJECT POOP 2", file: "pp2.mp3" },
+  { title: "ALL AGAIN", file: "allagain.mp3" }
+];
+
 document.addEventListener("DOMContentLoaded", () => {
+  drawScanlines();
+  window.addEventListener("resize", drawScanlines);
 
-  const container = document.querySelector(".hero-stack");
+  updateSongsFound();
+  buildPlaylist();
+});
 
+function formatTime(t) {
+  if (!Number.isFinite(t) || t < 0) return "0:00";
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
 
-  function formatTime(t) {
-    const m = Math.floor(t / 60);
-    const s = Math.floor(t % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+function updateSongsFound() {
+  const el = document.getElementById("songs-found");
+  if (el) el.textContent = `Songs Found: ${songsFound}/52`;
+  localStorage.setItem("pp_songsfound", String(songsFound));
+}
+
+// CRT scanlines that always match the *browser window* size
+function drawScanlines() {
+  const canvas = document.getElementById("scanlines");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  // match device pixel ratio for crispness
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.50)";
+  for (let y = 0; y < h; y += 2) {
+    ctx.fillRect(0, y, w, 1);
   }
+}
 
+function buildPlaylist() {
+  const heroStack = document.querySelector(".hero-stack");
+  if (!heroStack) return;
 
-  songs.forEach((song, i) => {
+  // remove any previous playlist (in case of hot reloads)
+  heroStack.querySelectorAll(".playlist").forEach((p) => p.remove());
 
-    const wrap = document.createElement("div");
-    wrap.className = "audio-wrapper";
+  const container = document.createElement("div");
+  container.className = "playlist";
+  heroStack.appendChild(container);
 
+  songList.forEach((song, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "audio-wrapper";
 
-    wrap.innerHTML = `
-
+    wrapper.innerHTML = `
       <h4>${song.title}</h4>
 
-      <audio src="${song.file}"></audio>
+      <audio preload="metadata" src="${song.file}"></audio>
 
       <div class="timeline">
         <div class="progress"></div>
       </div>
 
       <div class="controls">
-
-        <button class="play-btn">▶️</button>
-
+        <button class="play-btn" type="button" aria-label="Play/Pause">▶️</button>
         <div class="time">
-          <span class="cur">0:00</span> /
-          <span class="dur">0:00</span>
+          <span class="cur">0:00</span> / <span class="dur">0:00</span>
         </div>
-
       </div>
-
     `;
 
+    container.appendChild(wrapper);
 
-    container.appendChild(wrap);
-
-
-    const audio = wrap.querySelector("audio");
-    const play = wrap.querySelector(".play-btn");
-    const progress = wrap.querySelector(".progress");
-    const timeline = wrap.querySelector(".timeline");
-    const cur = wrap.querySelector(".cur");
-    const dur = wrap.querySelector(".dur");
-
+    const audio = wrapper.querySelector("audio");
+    const playBtn = wrapper.querySelector(".play-btn");
+    const progress = wrapper.querySelector(".progress");
+    const timeline = wrapper.querySelector(".timeline");
+    const curEl = wrapper.querySelector(".cur");
+    const durEl = wrapper.querySelector(".dur");
 
     audio.addEventListener("loadedmetadata", () => {
-      dur.textContent = formatTime(audio.duration);
+      durEl.textContent = formatTime(audio.duration);
     });
-
 
     audio.addEventListener("timeupdate", () => {
-
-      const pct = (audio.currentTime / audio.duration) * 100;
-
-      progress.style.width = pct + "%";
-
-      cur.textContent = formatTime(audio.currentTime);
-
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progress.style.width = `${pct}%`;
+      curEl.textContent = formatTime(audio.currentTime);
     });
 
-
-    timeline.addEventListener("click", e => {
-
-      const x = e.offsetX / timeline.offsetWidth;
-
-      audio.currentTime = x * audio.duration;
-
+    timeline.addEventListener("click", (e) => {
+      const rect = timeline.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      if (audio.duration) audio.currentTime = x * audio.duration;
     });
 
-
-    play.addEventListener("click", () => {
-
-      document.querySelectorAll("audio").forEach(a => {
+    playBtn.addEventListener("click", async () => {
+      // pause all other audio first
+      document.querySelectorAll("audio").forEach((a) => {
         if (a !== audio) a.pause();
       });
-
+      document.querySelectorAll(".play-btn").forEach((b) => {
+        if (b !== playBtn) b.textContent = "▶️";
+      });
 
       if (audio.paused) {
-        audio.play();
-        play.textContent = "⏸️";
+        try {
+          await audio.play();
+          playBtn.textContent = "⏸️";
+        } catch (err) {
+          console.warn("Audio play blocked:", err);
+        }
       } else {
         audio.pause();
-        play.textContent = "▶️";
+        playBtn.textContent = "▶️";
       }
-
     });
-
 
     audio.addEventListener("ended", () => {
-      play.textContent = "▶️";
+      playBtn.textContent = "▶️";
     });
-
   });
-
-});
+}
