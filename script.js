@@ -1,5 +1,20 @@
 // ===== Project Poop (no Supabase) =====
+// iOS / Safari audio unlock
+let audioUnlocked = false;
 
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  const silent = new Audio();
+  silent.play().catch(() => {});
+  audioUnlocked = true;
+
+  console.log("Audio unlocked");
+}
+
+// First user interaction unlocks audio
+document.addEventListener("touchstart", unlockAudio, { once: true });
+document.addEventListener("click", unlockAudio, { once: true });
 // Local song progress (optional)
 let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 
@@ -170,26 +185,36 @@ function buildPlaylist() {
     });
 
     playBtn.addEventListener("click", async () => {
-      // pause all other audio first
-      document.querySelectorAll("audio").forEach((a) => {
-        if (a !== audio) a.pause();
-      });
-      document.querySelectorAll(".play-btn").forEach((b) => {
-        if (b !== playBtn) b.textContent = "▶️";
-      });
 
-      if (audio.paused) {
-        try {
-          await audio.play();
-          playBtn.textContent = "⏸️";
-        } catch (err) {
-          console.warn("Audio play blocked:", err);
-        }
-      } else {
-        audio.pause();
-        playBtn.textContent = "▶️";
-      }
-    });
+  unlockAudio(); // <-- IMPORTANT
+
+  // Pause others
+  document.querySelectorAll("audio").forEach(a => {
+    if (a !== audio) a.pause();
+  });
+
+  document.querySelectorAll(".play-btn").forEach(b => {
+    if (b !== playBtn) b.textContent = "▶️";
+  });
+
+  if (audio.paused) {
+
+    try {
+      await audio.play();
+      playBtn.textContent = "⏸️";
+
+    } catch (err) {
+      console.warn("Play blocked:", err);
+      alert("Tap once on the page, then try again.");
+    }
+
+  } else {
+
+    audio.pause();
+    playBtn.textContent = "▶️";
+
+  }
+});
 
     audio.addEventListener("ended", () => {
       playBtn.textContent = "▶️";
