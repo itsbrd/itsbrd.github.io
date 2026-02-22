@@ -6,7 +6,7 @@ let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 // --- GitHub repo settings (EDIT THESE) ---
 const GITHUB_OWNER = "itsbrd";
 const GITHUB_REPO  = "itsbrd.github.io";
-const GITHUB_BRANCH = "master"; // you said your default is master
+const GITHUB_BRANCH = "main"; // you said your default is master
 const SONGS_FOLDER = "songs";
 
 // This will be filled dynamically
