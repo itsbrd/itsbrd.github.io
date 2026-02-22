@@ -1,223 +1,224 @@
-// ===== Project Poop (no Supabase) =====
-// iOS / Safari audio unlock
-let audioUnlocked = false;
+// Project Poop – dynamic playlist loader + custom player UI
+// Works on GitHub Pages (no build tools). No modules/imports needed.
 
-function unlockAudio() {
-  if (audioUnlocked) return;
+// ====== CONFIG ======
+const GITHUB_OWNER  = "itsbrd";
+const GITHUB_REPO   = "itsbrd.github.io";
+const GITHUB_BRANCH = "main";
+const SONGS_PATH    = "songs"; // folder in repo containing audio files
 
-  const silent = new Audio();
-  silent.play().catch(() => {});
-  audioUnlocked = true;
+// Supported audio extensions (case-insensitive)
+const AUDIO_EXT_RE = /\.(mp3|wav|m4a|ogg)$/i;
 
-  console.log("Audio unlocked");
-}
-
-// First user interaction unlocks audio
-document.addEventListener("touchstart", unlockAudio, { once: true });
-document.addEventListener("click", unlockAudio, { once: true });
-// Local song progress (optional)
+// ====== STATE ======
 let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 
-// --- GitHub repo settings (EDIT THESE) ---
-const GITHUB_OWNER = "itsbrd";
-const GITHUB_REPO  = "itsbrd.github.io";
-const GITHUB_BRANCH = "main"; // you said your default is master
-const SONGS_FOLDER = "songs";
+// ====== DOM HELPERS ======
+function $(sel, root = document) { return root.querySelector(sel); }
+function $all(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 
-// This will be filled dynamically
-let songList = [];
-
-
-document.addEventListener("DOMContentLoaded", async () => {
-  drawScanlines();
-  window.addEventListener("resize", drawScanlines);
-
-  // Load songs dynamically from /songs folder
-  songList = await loadSongListFromGitHub();
-
-  // If you want the counter to reflect discovered songs on the page:
-  // (Your old `songsFound` was localStorage-based progress; keeping that as-is.)
-  updateSongsFound(songList.length);
-
-  buildPlaylist();
-});
-
-async function loadSongListFromGitHub() {
-  const apiURL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${SONGS_FOLDER}?ref=${GITHUB_BRANCH}`;
-
-  try {
-    const res = await fetch(apiURL, { cache: "no-store" });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error("GitHub API failed:", res.status, text);
-      return [];
-    }
-
-    const items = await res.json();
-
-    // Build list from every .wav (case-insensitive)
-    const wavs = items
-      .filter((x) => x.type === "file" && /\.wav$/i.test(x.name))
-      .map((x) => ({
-        // Show title as filename (no extension), prettified
-        title: x.name
-          .replace(/\.wav$/i, "")
-          .replace(/[_]+/g, " ")
-          .trim(),
-        // Direct download URL
-        file: x.download_url
-      }))
-      // Optional: sort alphabetically (nice for larger lists)
-      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
-
-    return wavs;
-  } catch (err) {
-    console.error("Failed to fetch songs:", err);
-    return [];
-  }
+function setStatus(msg) {
+  const el = document.getElementById("status");
+  if (el) el.textContent = msg || "";
 }
 
-function formatTime(t) {
-  if (!Number.isFinite(t) || t < 0) return "0:00";
-  const m = Math.floor(t / 60);
-  const s = Math.floor(t % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
-}
-
-// Updated to optionally show "Songs Found: X/52" where X = number of wav files found
-function updateSongsFound(foundCount) {
+function updateSongsFound() {
   const el = document.getElementById("songs-found");
-  if (el) el.textContent = `Songs Found: ${foundCount}/52`;
-
-  // Keep your old localStorage var in case you still want it for something later
+  if (el) el.textContent = `Songs Found: ${songsFound}/52`;
   localStorage.setItem("pp_songsfound", String(songsFound));
 }
 
-// CRT scanlines that always match the *browser window* size
-function drawScanlines() {
-  const canvas = document.getElementById("scanlines");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-
-  // match device pixel ratio for crispness
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(w * dpr);
-  canvas.height = Math.floor(h * dpr);
-  canvas.style.width = w + "px";
-  canvas.style.height = h + "px";
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.50)";
-  for (let y = 0; y < h; y += 2) {
-    ctx.fillRect(0, y, w, 1);
-  }
+function formatTime(time) {
+  if (!Number.isFinite(time) || time < 0) return "0:00";
+  const mins = Math.floor(time / 60);
+  const secs = Math.floor(time % 60).toString().padStart(2, "0");
+  return `${mins}:${secs}`;
 }
 
-function buildPlaylist() {
-  const heroStack = document.querySelector(".hero-stack");
-  if (!heroStack) return;
+function filenameToTitle(name) {
+  return name
+    .replace(AUDIO_EXT_RE, "")
+    .replace(/[_-]+/g, " ")
+    .trim();
+}
 
-  // remove any previous playlist (in case of hot reloads)
-  heroStack.querySelectorAll(".playlist").forEach((p) => p.remove());
+// ====== GITHUB API ======
+async function fetchRepoDirContents(path) {
+  const apiUrl =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
 
-  const container = document.createElement("div");
-  container.className = "playlist";
-  heroStack.appendChild(container);
+  const res = await fetch(apiUrl, { headers: { "Accept": "application/vnd.github+json" } });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`GitHub API ${res.status}: ${text || res.statusText}`);
+  }
 
-  if (!songList.length) {
-    const msg = document.createElement("div");
-    msg.className = "audio-wrapper";
-    msg.innerHTML = `<h4>No .wav files found in /songs</h4>`;
-    container.appendChild(msg);
+  const data = await res.json();
+  if (!Array.isArray(data)) {
+    throw new Error("Expected a directory listing array from GitHub API. Is SONGS_PATH a folder?");
+  }
+  return data;
+}
+
+async function loadSongListFromGitHub() {
+  const items = await fetchRepoDirContents(SONGS_PATH);
+
+  const files = items
+    .filter(i => i.type === "file" && AUDIO_EXT_RE.test(i.name) && i.download_url)
+    .map(i => ({
+      name: i.name,
+      title: filenameToTitle(i.name),
+      url: i.download_url
+    }))
+    // sort naturally (001, 002, 010…)
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+  return files;
+}
+
+// ====== UI BUILD ======
+function ensurePlaylistContainer() {
+  const heroStack = document.querySelector(".hero-stack") || document.body;
+  let container = heroStack.querySelector(".playlist");
+
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "playlist";
+    heroStack.appendChild(container);
+  }
+
+  return container;
+}
+
+function pauseAllExcept(currentAudio) {
+  $all("audio").forEach(a => { if (a !== currentAudio) a.pause(); });
+  $all(".audio-wrapper button").forEach(b => { b.textContent = "▶️"; });
+}
+
+function wirePlayer(wrapper) {
+  const audio = wrapper.querySelector("audio");
+  const button = wrapper.querySelector("button");
+  const timeline = wrapper.querySelector(".timeline");
+  const progress = wrapper.querySelector(".progress");
+  const currentTimeEl = wrapper.querySelector(".current-time");
+  const durationEl = wrapper.querySelector(".duration");
+
+  // Some browsers (esp iOS) can be picky; this helps with CORS + decoding.
+  audio.crossOrigin = "anonymous";
+  audio.preload = "metadata";
+
+  audio.addEventListener("loadedmetadata", () => {
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener("timeupdate", () => {
+    const dur = audio.duration || 0;
+    const pct = dur ? (audio.currentTime / dur) * 100 : 0;
+    progress.style.width = `${pct}%`;
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  audio.addEventListener("ended", () => {
+    button.textContent = "▶️";
+  });
+
+  audio.addEventListener("error", () => {
+    // This will catch 404s / unsupported codecs / CORS problems.
+    const mediaErr = audio.error;
+    console.error("[AudioError]", { src: audio.currentSrc, error: mediaErr });
+    setStatus("Audio failed to load. (Bad path or unsupported audio format.)");
+  });
+
+  timeline.addEventListener("click", (e) => {
+    const rect = timeline.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.min(1, Math.max(0, x / rect.width));
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      audio.currentTime = pct * audio.duration;
+    }
+  });
+
+  button.addEventListener("click", async () => {
+    setStatus("");
+
+    pauseAllExcept(audio);
+
+    // If already playing -> pause
+    if (!audio.paused) {
+      audio.pause();
+      button.textContent = "▶️";
+      return;
+    }
+
+    try {
+      // Force-load if needed (helps when metadata isn't ready yet)
+      if (audio.readyState < 2) audio.load();
+
+      const playPromise = audio.play();
+      // audio.play() returns a promise in modern browsers; await to catch blocks.
+      if (playPromise && typeof playPromise.then === "function") {
+        await playPromise;
+      }
+
+      button.textContent = "⏸️";
+    } catch (err) {
+      console.error("[PlayBlocked]", err);
+      // On iOS, this can happen if the browser thinks it wasn't a user gesture,
+      // or if the file can't be decoded. We give a helpful message.
+      setStatus("Tap the play button again (Safari can be picky), or check the file format/path.");
+      button.textContent = "▶️";
+    }
+  });
+}
+
+function createSongRow(song) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "audio-wrapper";
+
+  wrapper.innerHTML = `
+    <h4>${song.title}</h4>
+    <audio src="${song.url || song.file}"></audio>
+
+    <div class="timeline">
+      <div class="progress"></div>
+    </div>
+
+    <div class="time-info">
+      <span class="current-time">0:00</span> / <span class="duration">0:00</span>
+    </div>
+
+    <button type="button" aria-label="Play/Pause">▶️</button>
+  `;
+
+  wirePlayer(wrapper);
+  return wrapper;
+}
+
+async function buildPlaylist() {
+  const container = ensurePlaylistContainer();
+  container.innerHTML = "";
+
+  setStatus("Loading songs…");
+
+  let songs = [];
+  try {
+    songs = await loadSongListFromGitHub();
+  } catch (err) {
+    console.error("[SongLoadFail]", err);
+    setStatus("Couldn’t load songs from GitHub API. (Rate limit or bad path.)");
+  }
+
+  if (!songs.length) {
+    setStatus("No songs found in /songs (mp3/wav/m4a/ogg).");
     return;
   }
 
-  songList.forEach((song, index) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "audio-wrapper";
-
-    wrapper.innerHTML = `
-      <h4>${song.title}</h4>
-
-      <audio preload="metadata" src="${song.file}"></audio>
-
-      <div class="timeline">
-        <div class="progress"></div>
-      </div>
-
-      <div class="controls">
-        <button class="play-btn" type="button" aria-label="Play/Pause">▶️</button>
-        <div class="time">
-          <span class="cur">0:00</span> / <span class="dur">0:00</span>
-        </div>
-      </div>
-    `;
-
-    container.appendChild(wrapper);
-
-    const audio = wrapper.querySelector("audio");
-    const playBtn = wrapper.querySelector(".play-btn");
-    const progress = wrapper.querySelector(".progress");
-    const timeline = wrapper.querySelector(".timeline");
-    const curEl = wrapper.querySelector(".cur");
-    const durEl = wrapper.querySelector(".dur");
-
-    audio.addEventListener("loadedmetadata", () => {
-      durEl.textContent = formatTime(audio.duration);
-    });
-
-    audio.addEventListener("timeupdate", () => {
-      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-      progress.style.width = `${pct}%`;
-      curEl.textContent = formatTime(audio.currentTime);
-    });
-
-    timeline.addEventListener("click", (e) => {
-      const rect = timeline.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      if (audio.duration) audio.currentTime = x * audio.duration;
-    });
-
-    playBtn.addEventListener("click", async () => {
-
-  unlockAudio(); // <-- IMPORTANT
-
-  // Pause others
-  document.querySelectorAll("audio").forEach(a => {
-    if (a !== audio) a.pause();
-  });
-
-  document.querySelectorAll(".play-btn").forEach(b => {
-    if (b !== playBtn) b.textContent = "▶️";
-  });
-
-  if (audio.paused) {
-
-    try {
-      await audio.play();
-      playBtn.textContent = "⏸️";
-
-    } catch (err) {
-      console.warn("Play blocked:", err);
-      alert("Tap once on the page, then try again.");
-    }
-
-  } else {
-
-    audio.pause();
-    playBtn.textContent = "▶️";
-
-  }
-});
-
-    audio.addEventListener("ended", () => {
-      playBtn.textContent = "▶️";
-    });
-  });
+  setStatus(`Loaded ${songs.length} song(s).`);
+  songs.forEach(song => container.appendChild(createSongRow(song)));
 }
+
+// ====== BOOT ======
+document.addEventListener("DOMContentLoaded", () => {
+  updateSongsFound();
+  buildPlaylist();
+});

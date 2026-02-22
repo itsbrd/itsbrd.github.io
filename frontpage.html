@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=./index.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Project Poop</title>
+  <link rel="stylesheet" href="frontpage-style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-  <p>Redirecting… If you are not redirected, <a href="./index.html">click here</a>.</p>
+
+  <!-- CRT scanlines overlay -->
+  <canvas id="scanlines"></canvas>
+
+  <!-- Background -->
+  <div class="background-gif"></div>
+  <div class="background-overlay"></div>
+
+  <main class="hero-stack">
+    <img src="hero-top.gif" alt="Project Poop" class="hero-gif">
+    <!-- Playlist injected by script.js -->
+  </main>
+
+  <div id="songs-found">Songs Found: 0/52</div>
+
+  <div id="status" class="status"></div>
+
+  <footer>
+    PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
+  </footer>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
