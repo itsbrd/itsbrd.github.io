@@ -3,21 +3,64 @@
 // Local song progress (optional)
 let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 
-// Your songs (edit names/files here)
-const songList = [
-  { title: "PROJECT POOP", file: "theme.mp3" },
-  { title: "PROJECT PISS", file: "projectpiss.mp3" },
-  { title: "PROJECT POOP 2", file: "pp2.mp3" },
-  { title: "ALL AGAIN", file: "allagain.mp3" }
-];
+// --- GitHub repo settings (EDIT THESE) ---
+const GITHUB_OWNER = "itsbrd";
+const GITHUB_REPO  = "itsbrd.github.io";
+const GITHUB_BRANCH = "master"; // you said your default is master
+const SONGS_FOLDER = "songs";
 
-document.addEventListener("DOMContentLoaded", () => {
+// This will be filled dynamically
+let songList = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
   drawScanlines();
   window.addEventListener("resize", drawScanlines);
 
-  updateSongsFound();
+  // Load songs dynamically from /songs folder
+  songList = await loadSongListFromGitHub();
+
+  // If you want the counter to reflect discovered songs on the page:
+  // (Your old `songsFound` was localStorage-based progress; keeping that as-is.)
+  updateSongsFound(songList.length);
+
   buildPlaylist();
 });
+
+async function loadSongListFromGitHub() {
+  const apiURL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${SONGS_FOLDER}?ref=${GITHUB_BRANCH}`;
+
+  try {
+    const res = await fetch(apiURL, { cache: "no-store" });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error("GitHub API failed:", res.status, text);
+      return [];
+    }
+
+    const items = await res.json();
+
+    // Build list from every .wav (case-insensitive)
+    const wavs = items
+      .filter((x) => x.type === "file" && /\.wav$/i.test(x.name))
+      .map((x) => ({
+        // Show title as filename (no extension), prettified
+        title: x.name
+          .replace(/\.wav$/i, "")
+          .replace(/[_]+/g, " ")
+          .trim(),
+        // Direct download URL
+        file: x.download_url
+      }))
+      // Optional: sort alphabetically (nice for larger lists)
+      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+
+    return wavs;
+  } catch (err) {
+    console.error("Failed to fetch songs:", err);
+    return [];
+  }
+}
 
 function formatTime(t) {
   if (!Number.isFinite(t) || t < 0) return "0:00";
@@ -26,9 +69,12 @@ function formatTime(t) {
   return `${m}:${s}`;
 }
 
-function updateSongsFound() {
+// Updated to optionally show "Songs Found: X/52" where X = number of wav files found
+function updateSongsFound(foundCount) {
   const el = document.getElementById("songs-found");
-  if (el) el.textContent = `Songs Found: ${songsFound}/52`;
+  if (el) el.textContent = `Songs Found: ${foundCount}/52`;
+
+  // Keep your old localStorage var in case you still want it for something later
   localStorage.setItem("pp_songsfound", String(songsFound));
 }
 
@@ -67,6 +113,14 @@ function buildPlaylist() {
   const container = document.createElement("div");
   container.className = "playlist";
   heroStack.appendChild(container);
+
+  if (!songList.length) {
+    const msg = document.createElement("div");
+    msg.className = "audio-wrapper";
+    msg.innerHTML = `<h4>No .wav files found in /songs</h4>`;
+    container.appendChild(msg);
+    return;
+  }
 
   songList.forEach((song, index) => {
     const wrapper = document.createElement("div");
