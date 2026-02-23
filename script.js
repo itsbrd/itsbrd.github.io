@@ -1,207 +1,168 @@
-import { FALLBACK_SONGS } from './songs.js';
+// Local song progress
+let songsFound = Number(localStorage.getItem("pp_songsfound")) || 0;
 
-const GITHUB_OWNER = 'itsbrd';
-const GITHUB_REPO  = 'itsbrd.github.io';
-const SONGS_DIR    = 'songs';           // folder in repo
-const TOTAL_SONGS  = 52;
 
-const statusEl   = document.getElementById('status');
-const playlistEl = document.getElementById('playlist');
-const songsFoundEl = document.getElementById('songs-found');
+// Song List
+const songList = [
+  { title: "PROJECT POOP", file: "theme.mp3" },
+  { title: "PROJECT PISS", file: "projectpiss.mp3" },
+  { title: "PROJECT POOP 2", file: "pp2.mp3" },
+  { title: "ALL AGAIN", file: "allagain.mp3" }
+];
 
-function setStatus(msg){
-  if (!statusEl) return;
-  statusEl.textContent = msg || '';
-}
 
-function formatTime(t){
-  if (!Number.isFinite(t) || t < 0) return '0:00';
-  const m = Math.floor(t/60);
-  const s = Math.floor(t%60).toString().padStart(2,'0');
-  return `${m}:${s}`;
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-// Single shared audio element to avoid iOS Safari weirdness with multiple audio tags
-const audio = new Audio();
-audio.preload = 'metadata';
+  updateSongsFound();
+  buildPlaylist();
 
-let currentButton = null;
-let currentProgress = null;
-let currentTimeEl = null;
-let currentDurationEl = null;
-
-function pauseAndResetUI(){
-  audio.pause();
-  if (currentButton) currentButton.textContent = '▶️';
-}
-
-audio.addEventListener('ended', pauseAndResetUI);
-
-audio.addEventListener('timeupdate', () => {
-  if (!currentProgress || !currentTimeEl) return;
-  const pct = (audio.currentTime / (audio.duration || 1)) * 100;
-  currentProgress.style.width = `${pct}%`;
-  currentTimeEl.textContent = formatTime(audio.currentTime);
 });
 
-audio.addEventListener('loadedmetadata', () => {
-  if (currentDurationEl) currentDurationEl.textContent = formatTime(audio.duration);
-});
 
-audio.addEventListener('error', () => {
-  setStatus('Audio error. If this is WAV, try MP3 (iOS Safari is picky). Also confirm file path: /songs/filename.mp3');
-  pauseAndResetUI();
-});
+// Update counter
+function updateSongsFound() {
 
-async function fetchSongsFromGitHub(){
-  const cacheKey = 'pp_song_cache_v1';
-  const cacheTsKey = 'pp_song_cache_ts_v1';
-  const cached = localStorage.getItem(cacheKey);
-  const ts = Number(localStorage.getItem(cacheTsKey) || 0);
-  const fresh = cached && (Date.now() - ts) < (10 * 60 * 1000); // 10 min
+  document.getElementById("songs-found").textContent =
+    `Songs Found: ${songsFound}/52`;
 
-  if (fresh){
-    try { return JSON.parse(cached); } catch {}
-  }
+  localStorage.setItem("pp_songsfound", songsFound);
 
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${SONGS_DIR}`;
-  const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } });
-  if (!res.ok) throw new Error(`GitHub API ${res.status} ${res.statusText}`);
-
-  const items = await res.json();
-  const songs = items
-    .filter(x => x.type === 'file')
-    .filter(x => /\.(mp3|wav|m4a|aac|ogg)$/i.test(x.name))
-    .map(x => ({ title: prettifyTitle(x.name), file: `${SONGS_DIR}/${x.name}` }))
-    .sort((a,b) => a.title.localeCompare(b.title, undefined, { numeric:true, sensitivity:'base' }));
-
-  localStorage.setItem(cacheKey, JSON.stringify(songs));
-  localStorage.setItem(cacheTsKey, String(Date.now()));
-  return songs;
 }
 
-function prettifyTitle(filename){
-  const noExt = filename.replace(/\.[^.]+$/,'');
-  return noExt.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
-}
 
-function buildTrackUI(song){
-  const card = document.createElement('div');
-  card.className = 'track';
+// Build players
+function buildPlaylist() {
 
-  const title = document.createElement('h3');
-  title.className = 'track-title';
-  title.textContent = song.title;
+  const heroStack = document.querySelector(".hero-stack");
 
-  const timeline = document.createElement('div');
-  timeline.className = 'timeline';
+  const container = document.createElement("div");
+  container.className = "playlist";
 
-  const progress = document.createElement('div');
-  progress.className = 'progress';
-  timeline.appendChild(progress);
+  heroStack.appendChild(container);
 
-  const controls = document.createElement('div');
-  controls.className = 'controls';
 
-  const time = document.createElement('div');
-  time.className = 'time';
-  const cur = document.createElement('span');
-  cur.textContent = '0:00';
-  const dur = document.createElement('span');
-  dur.textContent = '0:00';
-  time.appendChild(cur);
-  time.appendChild(document.createTextNode(' / '));
-  time.appendChild(dur);
+  songList.forEach((song) => {
 
-  const btn = document.createElement('button');
-  btn.className = 'playbtn';
-  btn.type = 'button';
-  btn.textContent = '▶️';
+    const wrapper = document.createElement("div");
+    wrapper.className = "audio-wrapper";
 
-  timeline.addEventListener('click', (e) => {
-    const nextSrc = new URL(song.file, window.location.href).toString();
-    if (audio.src !== nextSrc || !Number.isFinite(audio.duration)) return;
-    const rect = timeline.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = Math.max(0, Math.min(audio.duration, pct * audio.duration));
-  });
+    wrapper.innerHTML = `
+      <h4>${song.title}</h4>
 
-  btn.addEventListener('click', async () => {
-    try{
-      const nextSrc = new URL(song.file, window.location.href).toString();
+      <audio preload="none">
+        <source src="${song.file}" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
 
-      currentButton = btn;
-      currentProgress = progress;
-      currentTimeEl = cur;
-      currentDurationEl = dur;
+      <div class="timeline">
+        <div class="progress"></div>
+      </div>
 
-      if (audio.src !== nextSrc){
-        pauseAndResetUI();
-        progress.style.width = '0%';
-        cur.textContent = '0:00';
-        dur.textContent = '0:00';
-        audio.src = nextSrc;
-        audio.load();
-      }
+      <div class="controls">
+        <div class="time-info">0:00 / 0:00</div>
+        <div class="button-row">
+          <button class="play-btn" type="button">▶️</button>
+          <a class="download-btn" href="${song.file}" download="${song.file.split('/').pop()}" title="Download" aria-label="Download ${song.title}">⬇️</a>
+        </div>
+      </div>
+    `;
 
-      if (audio.paused){
-        setStatus('');
-        const p = audio.play();
-        if (p) await p;
-        btn.textContent = '⏸️';
+    container.appendChild(wrapper);
+
+
+    const audio = wrapper.querySelector("audio");
+    const button = wrapper.querySelector("button");
+
+    const timeline = wrapper.querySelector(".timeline");
+    const progress = wrapper.querySelector(".progress");
+
+    const current = wrapper.querySelector(".current");
+    const duration = wrapper.querySelector(".duration");
+
+
+    // Metadata
+    audio.addEventListener("loadedmetadata", () => {
+      duration.textContent = formatTime(audio.duration);
+    });
+
+
+    // Progress
+    audio.addEventListener("timeupdate", () => {
+
+      const percent =
+        (audio.currentTime / audio.duration) * 100;
+
+      progress.style.width = percent + "%";
+
+      current.textContent = formatTime(audio.currentTime);
+
+    });
+
+
+    // Seek
+    timeline.addEventListener("click", (e) => {
+
+      const rect = timeline.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+
+      const percent = x / rect.width;
+
+      audio.currentTime = percent * audio.duration;
+
+    });
+
+
+    // Play / Pause
+    button.addEventListener("click", () => {
+
+      document.querySelectorAll("audio").forEach(a => {
+        if (a !== audio) a.pause();
+      });
+
+      document.querySelectorAll(".audio-wrapper button")
+        .forEach(b => b.textContent = "▶️");
+
+
+      if (audio.paused) {
+        audio.play();
+        button.textContent = "⏸️";
       } else {
         audio.pause();
-        btn.textContent = '▶️';
+        button.textContent = "▶️";
       }
-    } catch(err){
-      console.error('[PlayError]', err);
-      setStatus('Playback blocked. Tap the page once, then press play again. MP3 works best on iPhone.');
-      btn.textContent = '▶️';
-    }
+
+    });
+
+
+    // Finished
+    audio.addEventListener("ended", () => {
+      button.textContent = "▶️";
+    });
+
   });
 
-  controls.appendChild(time);
-  controls.appendChild(btn);
-
-  card.appendChild(title);
-  card.appendChild(timeline);
-  card.appendChild(controls);
-  return card;
 }
 
-async function init(){
-  if (!playlistEl){
-    console.warn('[Init] No #playlist found.');
-    return;
-  }
 
-  setStatus('Loading songs…');
+// Format time
+function formatTime(time) {
 
-  let songs = [];
-  try{
-    songs = await fetchSongsFromGitHub();
-    if (!songs.length) throw new Error('No audio files found in /songs.');
-    setStatus('');
-  } catch (e){
-    console.warn('[Songs] GitHub fetch failed, using fallback list.', e);
-    setStatus('Could not load songs via GitHub API (rate limit/offline). Using fallback list.');
-    songs = Array.isArray(FALLBACK_SONGS) ? FALLBACK_SONGS : [];
-  }
+  const min = Math.floor(time / 60);
+  const sec = Math.floor(time % 60).toString().padStart(2, "0");
 
-  playlistEl.innerHTML = '';
-  songs.forEach(song => playlistEl.appendChild(buildTrackUI(song)));
+  return `${min}:${sec}`;
 
-  if (songsFoundEl){
-    songsFoundEl.textContent = `Songs Found: 0/${TOTAL_SONGS}`;
-  }
-
-  console.log('[Init] Songs loaded:', songs.length);
-  console.log('[Init] Example song path:', songs[0]?.file);
-  if (!songs.length) setStatus('No songs found.');
 }
 
-if (document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+
+// Resize safety
+window.addEventListener("resize", () => {
+
+  const bg = document.querySelector(".background-gif");
+
+  if (bg) {
+    bg.style.width = "100vw";
+    bg.style.height = "100vh";
+  }
+
+});
