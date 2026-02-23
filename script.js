@@ -1,113 +1,207 @@
-// ===== PROJECT POOP RUNTIME (NO TAP GATE) =====
+import { FALLBACK_SONGS } from './songs.js';
 
-const playlistContainer = document.getElementById("playlist");
-const songsFoundEl = document.getElementById("songsFound");
+const GITHUB_OWNER = 'itsbrd';
+const GITHUB_REPO  = 'itsbrd.github.io';
+const SONGS_DIR    = 'songs';           // folder in repo
+const TOTAL_SONGS  = 52;
 
-let currentAudio = null;
+const statusEl   = document.getElementById('status');
+const playlistEl = document.getElementById('playlist');
+const songsFoundEl = document.getElementById('songs-found');
+
+function setStatus(msg){
+  if (!statusEl) return;
+  statusEl.textContent = msg || '';
+}
+
+function formatTime(t){
+  if (!Number.isFinite(t) || t < 0) return '0:00';
+  const m = Math.floor(t/60);
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+// Single shared audio element to avoid iOS Safari weirdness with multiple audio tags
+const audio = new Audio();
+audio.preload = 'metadata';
+
 let currentButton = null;
+let currentProgress = null;
+let currentTimeEl = null;
+let currentDurationEl = null;
 
-// Load songs from songs.js
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadSongs();
+function pauseAndResetUI(){
+  audio.pause();
+  if (currentButton) currentButton.textContent = '▶️';
+}
+
+audio.addEventListener('ended', pauseAndResetUI);
+
+audio.addEventListener('timeupdate', () => {
+  if (!currentProgress || !currentTimeEl) return;
+  const pct = (audio.currentTime / (audio.duration || 1)) * 100;
+  currentProgress.style.width = `${pct}%`;
+  currentTimeEl.textContent = formatTime(audio.currentTime);
 });
 
-async function loadSongs() {
-  if (typeof getSongFiles !== "function") {
-    console.error("songs.js not loaded properly.");
+audio.addEventListener('loadedmetadata', () => {
+  if (currentDurationEl) currentDurationEl.textContent = formatTime(audio.duration);
+});
+
+audio.addEventListener('error', () => {
+  setStatus('Audio error. If this is WAV, try MP3 (iOS Safari is picky). Also confirm file path: /songs/filename.mp3');
+  pauseAndResetUI();
+});
+
+async function fetchSongsFromGitHub(){
+  const cacheKey = 'pp_song_cache_v1';
+  const cacheTsKey = 'pp_song_cache_ts_v1';
+  const cached = localStorage.getItem(cacheKey);
+  const ts = Number(localStorage.getItem(cacheTsKey) || 0);
+  const fresh = cached && (Date.now() - ts) < (10 * 60 * 1000); // 10 min
+
+  if (fresh){
+    try { return JSON.parse(cached); } catch {}
+  }
+
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${SONGS_DIR}`;
+  const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } });
+  if (!res.ok) throw new Error(`GitHub API ${res.status} ${res.statusText}`);
+
+  const items = await res.json();
+  const songs = items
+    .filter(x => x.type === 'file')
+    .filter(x => /\.(mp3|wav|m4a|aac|ogg)$/i.test(x.name))
+    .map(x => ({ title: prettifyTitle(x.name), file: `${SONGS_DIR}/${x.name}` }))
+    .sort((a,b) => a.title.localeCompare(b.title, undefined, { numeric:true, sensitivity:'base' }));
+
+  localStorage.setItem(cacheKey, JSON.stringify(songs));
+  localStorage.setItem(cacheTsKey, String(Date.now()));
+  return songs;
+}
+
+function prettifyTitle(filename){
+  const noExt = filename.replace(/\.[^.]+$/,'');
+  return noExt.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+}
+
+function buildTrackUI(song){
+  const card = document.createElement('div');
+  card.className = 'track';
+
+  const title = document.createElement('h3');
+  title.className = 'track-title';
+  title.textContent = song.title;
+
+  const timeline = document.createElement('div');
+  timeline.className = 'timeline';
+
+  const progress = document.createElement('div');
+  progress.className = 'progress';
+  timeline.appendChild(progress);
+
+  const controls = document.createElement('div');
+  controls.className = 'controls';
+
+  const time = document.createElement('div');
+  time.className = 'time';
+  const cur = document.createElement('span');
+  cur.textContent = '0:00';
+  const dur = document.createElement('span');
+  dur.textContent = '0:00';
+  time.appendChild(cur);
+  time.appendChild(document.createTextNode(' / '));
+  time.appendChild(dur);
+
+  const btn = document.createElement('button');
+  btn.className = 'playbtn';
+  btn.type = 'button';
+  btn.textContent = '▶️';
+
+  timeline.addEventListener('click', (e) => {
+    const nextSrc = new URL(song.file, window.location.href).toString();
+    if (audio.src !== nextSrc || !Number.isFinite(audio.duration)) return;
+    const rect = timeline.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, pct * audio.duration));
+  });
+
+  btn.addEventListener('click', async () => {
+    try{
+      const nextSrc = new URL(song.file, window.location.href).toString();
+
+      currentButton = btn;
+      currentProgress = progress;
+      currentTimeEl = cur;
+      currentDurationEl = dur;
+
+      if (audio.src !== nextSrc){
+        pauseAndResetUI();
+        progress.style.width = '0%';
+        cur.textContent = '0:00';
+        dur.textContent = '0:00';
+        audio.src = nextSrc;
+        audio.load();
+      }
+
+      if (audio.paused){
+        setStatus('');
+        const p = audio.play();
+        if (p) await p;
+        btn.textContent = '⏸️';
+      } else {
+        audio.pause();
+        btn.textContent = '▶️';
+      }
+    } catch(err){
+      console.error('[PlayError]', err);
+      setStatus('Playback blocked. Tap the page once, then press play again. MP3 works best on iPhone.');
+      btn.textContent = '▶️';
+    }
+  });
+
+  controls.appendChild(time);
+  controls.appendChild(btn);
+
+  card.appendChild(title);
+  card.appendChild(timeline);
+  card.appendChild(controls);
+  return card;
+}
+
+async function init(){
+  if (!playlistEl){
+    console.warn('[Init] No #playlist found.');
     return;
   }
 
-  const files = await getSongFiles();
-  songsFoundEl.textContent = `Songs Found: ${files.length}/52`;
+  setStatus('Loading songs…');
 
-  files.forEach((file) => {
-    createTrackCard(file);
-  });
+  let songs = [];
+  try{
+    songs = await fetchSongsFromGitHub();
+    if (!songs.length) throw new Error('No audio files found in /songs.');
+    setStatus('');
+  } catch (e){
+    console.warn('[Songs] GitHub fetch failed, using fallback list.', e);
+    setStatus('Could not load songs via GitHub API (rate limit/offline). Using fallback list.');
+    songs = Array.isArray(FALLBACK_SONGS) ? FALLBACK_SONGS : [];
+  }
+
+  playlistEl.innerHTML = '';
+  songs.forEach(song => playlistEl.appendChild(buildTrackUI(song)));
+
+  if (songsFoundEl){
+    songsFoundEl.textContent = `Songs Found: 0/${TOTAL_SONGS}`;
+  }
+
+  console.log('[Init] Songs loaded:', songs.length);
+  console.log('[Init] Example song path:', songs[0]?.file);
+  if (!songs.length) setStatus('No songs found.');
 }
 
-function createTrackCard(file) {
-  const card = document.createElement("div");
-  card.className = "track-card";
-
-  const title = document.createElement("div");
-  title.className = "track-title";
-  title.textContent = formatTitle(file.name);
-
-  const controls = document.createElement("div");
-  controls.className = "track-controls";
-
-  const playBtn = document.createElement("img");
-  playBtn.src = "play-button.png";
-  playBtn.className = "play-button";
-
-  const progress = document.createElement("div");
-  progress.className = "progress-bar";
-
-  const progressFill = document.createElement("div");
-  progressFill.className = "progress-fill";
-  progress.appendChild(progressFill);
-
-  const time = document.createElement("div");
-  time.className = "time-display";
-  time.textContent = "0:00 / 0:00";
-
-  const downloadBtn = document.createElement("a");
-  downloadBtn.href = file.url;
-  downloadBtn.download = file.name;
-  downloadBtn.className = "download-button";
-  downloadBtn.textContent = "⬇";
-
-  const audio = new Audio(file.url);
-
-  playBtn.addEventListener("click", () => {
-    if (currentAudio && currentAudio !== audio) {
-      currentAudio.pause();
-      currentButton.src = "play-button.png";
-    }
-
-    if (audio.paused) {
-      audio.play();
-      playBtn.src = "pause-button.png";
-      currentAudio = audio;
-      currentButton = playBtn;
-    } else {
-      audio.pause();
-      playBtn.src = "play-button.png";
-    }
-  });
-
-  audio.addEventListener("timeupdate", () => {
-    const percent = (audio.currentTime / audio.duration) * 100;
-    progressFill.style.width = percent + "%";
-
-    time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-  });
-
-  audio.addEventListener("ended", () => {
-    playBtn.src = "play-button.png";
-  });
-
-  controls.appendChild(playBtn);
-  controls.appendChild(progress);
-  controls.appendChild(time);
-  controls.appendChild(downloadBtn);
-
-  card.appendChild(title);
-  card.appendChild(controls);
-
-  playlistContainer.appendChild(card);
-}
-
-function formatTitle(filename) {
-  return filename
-    .replace(/\.(mp3|wav)$/i, "")
-    .replace(/[-_]/g, " ")
-    .toUpperCase();
-}
-
-function formatTime(seconds) {
-  if (!seconds || isNaN(seconds)) return "0:00";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }

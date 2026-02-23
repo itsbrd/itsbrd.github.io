@@ -5,39 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project Poop</title>
   <link rel="stylesheet" href="frontpage-style.css" />
-  <link rel="icon" type="image/x-icon" href="favicon.jpeg" />
 </head>
 <body>
-  <!-- CRT scanlines -->
-  <canvas id="scanlines" aria-hidden="true"></canvas>
-
-  <!-- Background -->
+  <canvas id="scanlines"></canvas>
   <div class="background"></div>
-  <div class="background-overlay"></div>
 
-  <div class="hud">
-    <div id="songs-found">Songs Found: 0/52</div>
-  </div>
+  <div id="songs-found">Songs Found: 0/52</div>
 
-  <main class="page">
-    <div class="album-wrap">
-      <img class="album-art" src="cover.jpg" alt="Album art" />
-    </div>
-
-    <section class="playlist" id="playlist" aria-label="Playlist"></section>
-
-    <footer class="footer">
-      PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
-    </footer>
+  <main class="hero-stack">
+    <img id="album-art" class="album-art" src="cover.jpg" alt="Album art" />
+    <div id="status" class="status" aria-live="polite"></div>
+    <div id="playlist" class="playlist"></div>
   </main>
 
-  <!-- Tap-to-enable hint (iOS/Safari sometimes blocks first play) -->
-  <div id="tap-overlay" class="tap-overlay" hidden>
-    <div class="tap-box">
-      Tap anywhere to enable audio
-    </div>
-  </div>
+  <footer>
+    PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
+  </footer>
 
   <script type="module" src="script.js"></script>
+
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+
+      for (let y = 0; y < height; y += 2) {
+        ctx.fillRect(0, y, width, 1);
+      }
+    }
+
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
 </body>
 </html>
