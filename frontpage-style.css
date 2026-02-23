@@ -1,167 +1,195 @@
-/* Reset */
+/* Project Poop – Frontpage (dark CRT look) */
 
-* {
+:root {
+  --bg: #000;
+  --fg: #fff;
+  --card: rgba(0, 0, 0, 0.75);
+  --border: rgba(255, 255, 255, 0.18);
+  --muted: rgba(255, 255, 255, 0.7);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-   
-body {
-  background: black;
-  color: white;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-
-/* Background */
-
+/* Full-width background image behind everything */
 .background-gif {
   position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 100vw;
-  height: 100vh;
-
-  background-image: url("background.png");
+  inset: 0;
+  background-image: url('background.png');
+  background-size: cover;      /* ensure it always fits screen width */
+  background-position: center;
   background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-
   z-index: -3;
 }
 
+/* Optional dark vignette / contrast */
 .background-overlay {
   position: fixed;
   inset: 0;
-
-  background: rgba(0, 0, 0, 0.4);
-
+  background: radial-gradient(circle at 50% 30%, rgba(0,0,0,0.35), rgba(0,0,0,0.85));
   z-index: -2;
 }
 
-
-/* Scanlines */
-
+/* Scanlines canvas */
 #scanlines {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-  z-index: 10;
+  z-index: 9999;
 }
 
-
-/* Main Area */
-
 .hero-stack {
-  min-height: 100vh;
-
+  width: min(720px, 92vw);
+  margin: 32px auto 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-
-  padding: 40px 20px;
-  gap: 25px;
+  gap: 18px;
 }
 
+/* The big art on top */
+.hero-art {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.7);
+}
 
-/* Playlist */
+/* Songs found top-right */
+#songs-found {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10000;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+
+footer {
+  position: relative;
+  z-index: 1;
+  width: min(900px, 92vw);
+  margin: 0 auto 26px;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+}
 
 .playlist {
   width: 100%;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .audio-wrapper {
-  background: rgba(0, 0, 0, 0.7);
-
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-
-  padding: 15px;
-  margin-bottom: 15px;
+  width: 100%;
+  padding: 18px 18px 16px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
 }
 
 .audio-wrapper h4 {
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin: 0 0 10px;
+  font-size: 26px;
   letter-spacing: 1px;
 }
 
-
-/* Timeline */
-
 .timeline {
   width: 100%;
-  height: 6px;
-
-  background: #333;
-  border-radius: 4px;
-
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
   cursor: pointer;
-  margin: 8px 0;
 }
 
 .progress {
   height: 100%;
   width: 0%;
-
-  background: #0f0;
-  border-radius: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.8);
 }
 
-
-/* Time */
-
 .time-info {
-  font-size: 12px;
+  margin-top: 10px;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+/* Emoji-only button */
+.pp-emoji-btn {
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.8));
+}
+
+.pp-emoji-btn:active {
+  transform: translateY(1px);
+}
+
+/* Tap-to-enable overlay */
+#tap-to-enable {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  z-index: 10001;
+}
+
+#tap-to-enable .tap-card {
+  width: min(520px, 88vw);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.75);
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 18px 18px 16px;
+  text-align: center;
+}
+
+#tap-to-enable .tap-title {
+  font-size: 22px;
   margin-bottom: 6px;
 }
 
-
-/* Buttons */
-
-.audio-wrapper button {
-  background: none;
-  border: none;
-
-  font-size: 26px;
-  cursor: pointer;
-
-  color: white;
-}
-
-.audio-wrapper button:hover {
-  opacity: 0.8;
-}
-
-
-/* Songs Found */
-
-#songs-found {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-
+#tap-to-enable .tap-sub {
   font-size: 14px;
-  letter-spacing: 1px;
-
-  z-index: 20;
+  color: rgba(255,255,255,0.75);
 }
 
-
-/* Footer */
-
-footer {
-  position: fixed;
-  bottom: 10px;
+.error-box {
   width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,0,0,0.12);
+  border: 1px solid rgba(255,0,0,0.35);
+  color: rgba(255,255,255,0.9);
+}
 
-  text-align: center;
-  font-size: 10px;
-  opacity: 0.7;
-
-  z-index: 20;
+/* Mobile tweaks */
+@media (max-width: 520px) {
+  .hero-stack { margin-top: 18px; }
+  .audio-wrapper h4 { font-size: 22px; }
+  #songs-found { font-size: 18px; }
+  .pp-emoji-btn { font-size: 40px; }
 }
