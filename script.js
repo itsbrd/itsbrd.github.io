@@ -69,20 +69,50 @@ async function fetchSongsFromGitHub(){
   if (!res.ok) throw new Error(`GitHub API ${res.status} ${res.statusText}`);
 
   const items = await res.json();
+
   const songs = items
     .filter(x => x.type === 'file')
     .filter(x => /\.(mp3|wav|m4a|aac|ogg)$/i.test(x.name))
-    .map(x => ({ title: prettifyTitle(x.name), file: `${SONGS_DIR}/${x.name}` }))
-    .sort((a,b) => a.title.localeCompare(b.title, undefined, { numeric:true, sensitivity:'base' }));
+    .map(x => {
+      const order = extractTrackNumber(x.name);
+      return {
+        order,
+        title: prettifyTitle(x.name),      // display title (number removed)
+        file: `${SONGS_DIR}/${x.name}`     // actual file path keeps the number
+      };
+    })
+    // Sort by leading number first, then fallback alphabetical
+    .sort((a,b) =>
+      (a.order - b.order) ||
+      a.title.localeCompare(b.title, undefined, { numeric:true, sensitivity:'base' })
+    );
 
   localStorage.setItem(cacheKey, JSON.stringify(songs));
   localStorage.setItem(cacheTsKey, String(Date.now()));
   return songs;
 }
 
+function extractTrackNumber(filename){
+  // matches: "01 song.mp3", "1 - song.mp3", "001_song.mp3", "12) song.mp3"
+  const base = filename.replace(/\.[^.]+$/,'');
+  const m = base.match(/^\s*(\d{1,4})\s*([\-_.\)]\s*)?/);
+  return m ? Number(m[1]) : Number.POSITIVE_INFINITY;
+}
+
 function prettifyTitle(filename){
-  const noExt = filename.replace(/\.[^.]+$/,'');
-  return noExt.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+  // 1) remove extension
+  let t = filename.replace(/\.[^.]+$/,'');
+
+  // 2) convert separators to spaces
+  t = t.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+
+  // 3) remove leading track number + optional punctuation
+  // "01 song" -> "song"
+  // "1 - song" -> "song"
+  // "12) song" -> "song"
+  t = t.replace(/^\s*\d{1,4}\s*[\)\.\-_:]*\s*/,'').trim();
+
+  return t;
 }
 
 function buildTrackUI(song){
