@@ -6,33 +6,48 @@
   <title>Project Poop</title>
   <link rel="stylesheet" href="frontpage-style.css" />
 </head>
+
 <body>
+
   <canvas id="scanlines"></canvas>
   <div class="background"></div>
 
   <div id="songs-found">Songs Found: 0/52</div>
 
   <main class="hero-stack">
-    <img id="album-art" class="album-art" src="cover.jpg" alt="Album art" />
-    <div id="status" class="status" aria-live="polite"></div>
-    <div id="playlist" class="playlist"></div>
-  </main>
-  
-  <img src="cover.jpg" class="album-cover">
 
-  <div class="album-links">
-    <a href="https://music.apple.com/us/album/trdfx-vol-1/1881431614" target="_blank" class="album-button itunes">
-      iTunes
-    </a>
-  
-    <a href="https://music.apple.comitsbrd" target="_blank" class="album-button apple">
-      Apple Music
-    </a>
-  
-    <a href="https://open.spotify.comitsbrd" target="_blank" class="album-button spotify">
-      Spotify
-    </a>
-  </div>
+    <!-- Album cover -->
+    <img id="album-art" class="album-art" src="cover.jpg" alt="Album art" />
+
+    <!-- Streaming buttons -->
+    <div class="album-links">
+
+      <a href="https://music.apple.com/us/album/trdfx-vol-1/1881431614"
+         target="_blank"
+         class="album-button itunes">
+        iTunes
+      </a>
+
+      <a href="PUT_APPLE_MUSIC_LINK_HERE"
+         target="_blank"
+         class="album-button apple">
+        Apple Music
+      </a>
+
+      <a href="PUT_SPOTIFY_LINK_HERE"
+         target="_blank"
+         class="album-button spotify">
+        Spotify
+      </a>
+
+    </div>
+
+    <div id="status" class="status" aria-live="polite"></div>
+
+    <!-- Playlist loads here -->
+    <div id="playlist" class="playlist"></div>
+
+  </main>
 
   <footer>
     PROJECT POOP is a subsidiary of DARK SIGMA INC., owned and operated by FREEZY LLC. Copyright 2025
@@ -44,6 +59,7 @@
     function drawScanlines() {
       const canvas = document.getElementById('scanlines');
       const ctx = canvas.getContext('2d');
+
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -51,7 +67,7 @@
       canvas.height = height;
 
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
 
       for (let y = 0; y < height; y += 2) {
         ctx.fillRect(0, y, width, 1);
@@ -61,5 +77,6 @@
     window.addEventListener('load', drawScanlines);
     window.addEventListener('resize', drawScanlines);
   </script>
+
 </body>
 </html>
