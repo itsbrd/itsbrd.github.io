@@ -4,126 +4,130 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://fauoohclvblciogeluiy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdW9vaGNsdmJsY2lvZ2VsdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTAzNzgsImV4cCI6MjA4NzE4NjM3OH0.uZlfIOpsf6ezDPfh9LhONsY2DsDQ9RQf2IRec1WXYWE";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const messagesEl = document.getElementById("messages");
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const hasSupabase = SUPABASE_URL && SUPABASE_ANON_KEY;
+const supabase = hasSupabase ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const logEl = document.getElementById("chat-log");
 const formEl = document.getElementById("chat-form");
-const inputEl = document.getElementById("message");
-const statusEl = document.getElementById("status");
-const changeNameBtn = document.getElementById("change-name");
+const inputEl = document.getElementById("chat-input");
+const nameBtn = document.getElementById("name-btn");
+const statusEl = document.getElementById("chat-status");
+
+function getName() {
+  return localStorage.getItem("pp_chat_name") || "";
+}
+function setName(name) {
+  localStorage.setItem("pp_chat_name", name);
+  nameBtn.textContent = `Name: ${name}`;
+}
+
+function ensureName() {
+  let name = getName();
+  if (!name) {
+    name = prompt("Pick a username:", "brd")?.trim() || "";
+    if (!name) name = "anon";
+    setName(name);
+  } else {
+    nameBtn.textContent = `Name: ${name}`;
+  }
+  return name;
+}
 
 function escapeHtml(str) {
-  return str
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
 }
 
-function formatTime(iso) {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "";
-  }
-}
-
-function getUsername() {
-  let name = localStorage.getItem("pp_chat_name");
-  if (!name) name = promptForName();
-  return name;
-}
-
-function promptForName() {
-  let name = prompt("Pick a username:", "itsbrd");
-  if (!name) name = "anon";
-  name = name.trim().slice(0, 20) || "anon";
-  localStorage.setItem("pp_chat_name", name);
-  return name;
-}
-
-function appendMessageRow(row, { scroll = false } = {}) {
-  const div = document.createElement("div");
-  div.className = "msg";
-  div.innerHTML = `
+function addMessage({ name, text, created_at }, { local = false } = {}) {
+  const row = document.createElement("div");
+  row.className = "msg" + (local ? " local" : "");
+  const time = created_at ? new Date(created_at).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) : "";
+  row.innerHTML = `
     <div class="meta">
-      <div class="user">${escapeHtml(row.username)}</div>
-      <div class="time">${escapeHtml(formatTime(row.created_at))}</div>
+      <span class="name">${escapeHtml(name || "anon")}</span>
+      <span class="time">${escapeHtml(time)}</span>
     </div>
-    <div class="text">${escapeHtml(row.message)}</div>
+    <div class="text">${escapeHtml(text || "")}</div>
   `;
-  messagesEl.appendChild(div);
-
-  if (scroll) {
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
+  logEl.appendChild(row);
+  logEl.scrollTop = logEl.scrollHeight;
 }
 
-async function loadRecent() {
-  statusEl.textContent = "Loading…";
-  const { data, error } = await supabase
-    .from("chat_messages")
-    .select("id, created_at, username, message")
-    .order("created_at", { ascending: true })
-    .limit(150);
-
-  if (error) {
-    console.error(error);
-    statusEl.textContent = `Error loading chat: ${error.message}`;
-    return;
-  }
-
-  messagesEl.innerHTML = "";
-  for (const row of data) appendMessageRow(row);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  statusEl.textContent = "";
-}
-
-function subscribeRealtime() {
-  supabase
-    .channel("pp-chat")
-    .on(
-      "postgres_changes",
-      { event: "INSERT", schema: "public", table: "chat_messages" },
-      (payload) => {
-        appendMessageRow(payload.new, { scroll: true });
-      }
-    )
-    .subscribe((state) => {
-      // optional debug
-      // console.log("Realtime:", state);
-    });
-}
-
-async function sendMessage(text) {
-  const username = getUsername();
-
-  const message = text.trim();
-  if (!message) return;
-
-  // tiny safety limits even for friends
-  const clean = message.slice(0, 200);
-
-  const { error } = await supabase.from("chat_messages").insert({
-    username,
-    message: clean
-  });
-
-  if (error) {
-    console.error(error);
-    statusEl.textContent = `Send failed: ${error.message}`;
-    return;
-  }
-
-  statusEl.textContent = "";
-}
-
-changeNameBtn.addEventListener("click", () => {
-  promptForName();
+nameBtn.addEventListener("click", () => {
+  const current = getName() || "anon";
+  const next = prompt("Change username:", current)?.trim();
+  if (next) setName(next);
 });
 
 formEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = inputEl.value;
+  e.preventDefault(); // ✅ stops page refresh
+  const name = ensureName();
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  inputEl.value = "";
+  inputEl.focus();
+
+  // show immediately
+  addMessage({ name, text, created_at: new Date().toISOString() }, { local: true });
+
+  // send to supabase if enabled
+  if (!hasSupabase) {
+    statusEl.textContent = "Local-only (no Supabase configured).";
+    return;
+  }
+
+  const { error } = await supabase.from("messages").insert({ name, text });
+  if (error) {
+    console.error(error);
+    statusEl.textContent = `Send failed: ${error.message}`;
+  } else {
+    statusEl.textContent = "";
+  }
+});
+
+async function start() {
+  ensureName();
+
+  if (!hasSupabase) {
+    statusEl.textContent = "Supabase not configured yet.";
+    return;
+  }
+
+  // load last messages
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .order("created_at", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    console.error(error);
+    statusEl.textContent = `Load failed: ${error.message}`;
+    return;
+  }
+
+  logEl.innerHTML = "";
+  data.forEach((m) => addMessage(m));
+
+  // realtime subscribe
+  supabase
+    .channel("pp-chat")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+      addMessage(payload.new);
+    })
+    .subscribe((s) => {
+      if (s === "SUBSCRIBED") statusEl.textContent = "Connected.";
+      setTimeout(() => (statusEl.textContent = ""), 800);
+    });
+}
+
+start();
