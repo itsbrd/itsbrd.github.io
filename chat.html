@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Poop — Chat</title>
+  <link rel="stylesheet" href="chat-style.css" />
+</head>
+<body>
+  <canvas id="scanlines"></canvas>
+  <div class="background"></div>
+
+  <header class="topbar">
+    <a class="back" href="frontpage.html">← Back</a>
+    <div class="title">PROJECT POOP CHAT</div>
+    <button id="change-name" class="btn">Name</button>
+  </header>
+
+  <main class="wrap">
+    <div id="messages" class="messages" aria-live="polite"></div>
+
+    <form id="chat-form" class="composer" autocomplete="off">
+      <input id="message" class="input" type="text" placeholder="Type a message…" maxlength="200" />
+      <button class="send btn" type="submit">Send</button>
+    </form>
+
+    <div id="status" class="status"></div>
+  </main>
+
+  <script type="module" src="chat.js"></script>
+
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      for (let y = 0; y < height; y += 2) ctx.fillRect(0, y, width, 1);
+    }
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
+</body>
+</html>
