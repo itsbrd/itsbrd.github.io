@@ -72,11 +72,19 @@
       max-width: 900px;
       margin: 0 auto;
       display:flex;
-      align-items:center;
-      gap:10px;
+      flex-direction:column;
+      align-items:stretch;
+      gap:6px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       color: var(--fg);
     }
+
+    .terminal-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
     .terminal-prompt{
       opacity:0.9;
       user-select:none;
@@ -90,6 +98,23 @@
       font-size: 14px;
       padding: 6px 4px;
     }
+
+    .terminal-output{
+      width:100%;
+      max-height: 180px;
+      overflow:auto;
+      padding: 0 2px 8px 2px;
+      font-size: 13px;
+      line-height: 1.35;
+      opacity: 0.95;
+    }
+    .terminal-line{
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0 0 6px 0;
+    }
+    .terminal-line .muted{ opacity:0.65; }
+
     .terminal-hint{
       opacity:0.55;
       font-size:12px;
@@ -126,9 +151,12 @@
 
   <div class="terminal-bar" role="region" aria-label="Terminal">
     <div class="terminal-inner">
-      <span class="terminal-prompt">&gt;</span>
-      <input class="terminal-input" type="text" placeholder="type a command (coming soon)" autocomplete="off" autocapitalize="off" spellcheck="false" />
-      <span class="terminal-hint">help • music • chat</span>
+      <div class="terminal-output" aria-live="polite"></div>
+      <div class="terminal-row">
+        <span class="terminal-prompt">&gt;</span>
+      <input class="terminal-input" type="text" placeholder="type a command (try: help)" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <span class="terminal-hint">help • music • chat • clear</span>
+      </div>
     </div>
   </div>
 
@@ -154,6 +182,114 @@
 
     window.addEventListener('load', drawScanlines);
     window.addEventListener('resize', drawScanlines);
+
+
+    // ===== Terminal (lightweight v1) =====
+    const termInput = document.querySelector('.terminal-input');
+    const termOut   = document.querySelector('.terminal-output');
+
+    const HISTORY_KEY = 'pp_term_history_v1';
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { history = []; }
+    let histIdx = history.length;
+
+    function printLine(text, cls=''){
+      if (!termOut) return;
+      const p = document.createElement('p');
+      p.className = 'terminal-line' + (cls ? ` ${cls}` : '');
+      p.textContent = text;
+      termOut.appendChild(p);
+      termOut.scrollTop = termOut.scrollHeight;
+    }
+
+    function printBannerOnce(){
+      const seenKey = 'pp_term_seen_v1';
+      if (localStorage.getItem(seenKey)) return;
+      localStorage.setItem(seenKey, '1');
+      printLine('ProjectPoop Terminal v1');
+      printLine('Type "help" to see commands.');
+    }
+
+    function runCommand(raw){
+      const input = (raw || '').trim();
+      if (!input) return;
+
+      history.push(input);
+      if (history.length > 50) history.shift();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      histIdx = history.length;
+
+      printLine('> ' + input);
+
+      const [cmd, ...rest] = input.split(/\s+/);
+      const c = (cmd || '').toLowerCase();
+      const arg = rest.join(' ');
+
+      switch (c){
+        case 'help':
+          printLine('Commands:');
+          printLine('  help   - show this list');
+          printLine('  music  - open the music page');
+          printLine('  chat   - open the chat room');
+          printLine('  clear  - clear terminal output');
+          printLine('  home   - reload the home page');
+          break;
+
+        case 'music':
+          printLine('Opening music…');
+          window.location.href = 'frontpage.html';
+          break;
+
+        case 'chat':
+        case 'chatroom':
+          printLine('Opening chat room…');
+          window.location.href = 'chat.html';
+          break;
+
+        case 'home':
+          printLine('Returning home…');
+          window.location.href = 'index.html';
+          break;
+
+        case 'clear':
+          if (termOut) termOut.innerHTML = '';
+          break;
+
+        default:
+          printLine(`Unknown command: ${cmd}`);
+          printLine('Type "help" for commands.');
+          break;
+      }
+    }
+
+    if (termInput){
+      printBannerOnce();
+
+      termInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          const val = termInput.value;
+          termInput.value = '';
+          runCommand(val);
+        } else if (e.key === 'ArrowUp'){
+          if (!history.length) return;
+          e.preventDefault();
+          histIdx = Math.max(0, histIdx - 1);
+          termInput.value = history[histIdx] ?? '';
+          // move cursor to end
+          termInput.setSelectionRange(termInput.value.length, termInput.value.length);
+        } else if (e.key === 'ArrowDown'){
+          if (!history.length) return;
+          e.preventDefault();
+          histIdx = Math.min(history.length, histIdx + 1);
+          termInput.value = history[histIdx] ?? '';
+          termInput.setSelectionRange(termInput.value.length, termInput.value.length);
+        } else if (e.key === 'Escape'){
+          termInput.value = '';
+        }
+      });
+    }
+
   </script>
 </body>
 </html>
