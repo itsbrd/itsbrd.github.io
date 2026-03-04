@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account | Project Poop</title>
+  <link rel="stylesheet" href="frontpage-style.css" />
+</head>
+
+<body>
+  <canvas id="scanlines"></canvas>
+  <div class="background"></div>
+
+  <div class="main-container">
+    <h1>ACCOUNT</h1>
+
+    <div class="terminal-box">
+      <div class="terminal-line">PROJECT POOP OS // AUTH</div>
+      <div class="terminal-line">--------------------------------</div>
+
+      <div class="terminal-line subtle" id="statusLine">status: checking session…</div>
+      <div style="height: 14px;"></div>
+
+      <!-- SIGN UP -->
+      <div class="terminal-line">create account</div>
+      <form id="signupForm" autocomplete="off">
+        <input id="signupEmail" class="terminal-input-like" type="email" placeholder="email" required />
+        <input id="signupPassword" class="terminal-input-like" type="password" placeholder="password" required />
+        <button class="enter-button" type="submit">Sign Up</button>
+      </form>
+
+      <div style="height: 18px;"></div>
+
+      <!-- SIGN IN -->
+      <div class="terminal-line">log in</div>
+      <form id="signinForm" autocomplete="off">
+        <input id="signinEmail" class="terminal-input-like" type="email" placeholder="email" required />
+        <input id="signinPassword" class="terminal-input-like" type="password" placeholder="password" required />
+        <button class="enter-button" type="submit">Sign In</button>
+      </form>
+
+      <div style="height: 18px;"></div>
+
+      <!-- SIGN OUT -->
+      <button class="enter-button" id="signoutBtn" type="button">Sign Out</button>
+
+      <div style="height: 14px;"></div>
+      <div class="terminal-line subtle" id="msgLine"></div>
+
+      <div style="height: 16px;"></div>
+      <a href="index.html" class="enter-button">Return Home</a>
+    </div>
+  </div>
+
+  <script>
+    // reuse your scanlines approach
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      for (let y = 0; y < height; y += 2) ctx.fillRect(0, y, width, 1);
+    }
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
+
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
+
+    const statusLine = document.getElementById("statusLine");
+    const msgLine = document.getElementById("msgLine");
+
+    const signupForm = document.getElementById("signupForm");
+    const signinForm = document.getElementById("signinForm");
+    const signoutBtn = document.getElementById("signoutBtn");
+
+    function setMsg(text, isError=false){
+      msgLine.textContent = text || "";
+      msgLine.style.opacity = text ? "1" : "0.6";
+      msgLine.style.color = isError ? "rgba(255,120,120,0.95)" : "rgba(255,255,255,0.8)";
+    }
+
+    async function refreshSessionUI(){
+      const { data, error } = await supabase.auth.getSession();
+      if (error){
+        statusLine.textContent = "status: error reading session";
+        setMsg(error.message, true);
+        return;
+      }
+      const session = data.session;
+      if (session?.user?.email){
+        statusLine.textContent = `status: signed in as ${session.user.email}`;
+      } else {
+        statusLine.textContent = "status: signed out";
+      }
+    }
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setMsg("");
+
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error){
+        setMsg(error.message, true);
+        return;
+      }
+
+      setMsg("Sign up sent. Check your email (you may need to confirm) then sign in.");
+      await refreshSessionUI();
+    });
+
+    signinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setMsg("");
+
+      const email = document.getElementById("signinEmail").value.trim();
+      const password = document.getElementById("signinPassword").value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error){
+        setMsg(error.message, true);
+        return;
+      }
+
+      setMsg("Signed in.");
+      await refreshSessionUI();
+    });
+
+    signoutBtn.addEventListener("click", async () => {
+      setMsg("");
+      const { error } = await supabase.auth.signOut();
+      if (error){
+        setMsg(error.message, true);
+        return;
+      }
+      setMsg("Signed out.");
+      await refreshSessionUI();
+    });
+
+    // keep UI synced if auth state changes
+    supabase.auth.onAuthStateChange(() => refreshSessionUI());
+    await refreshSessionUI();
+  </script>
+</body>
+</html>
