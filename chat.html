@@ -36,13 +36,22 @@
   </section>
 
   <aside class="side-col">
+    <div class="side-title">VOICE</div>
+    <div id="voice-status" class="status">Voice: off</div>
+    <div id="voice-users" class="user-list"></div>
+
+    <div class="side-divider"></div>
+
     <div class="side-title">ONLINE</div>
     <div id="user-list" class="user-list"></div>
+
+    <!-- Hidden audio nodes for remote peers -->
+    <div id="voice-audios"></div>
   </aside>
 </main>
 
 <script type="module" src="chat.js"></script>
-<script src="voice.js"></script>
+<script type="module" src="voice.js"></script>
 
 <script>
 function drawScanlines(){
