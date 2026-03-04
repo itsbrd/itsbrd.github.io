@@ -355,6 +355,13 @@ body{
 }
 .playbtn:active{ transform: scale(0.96); }
 
+/* Let clicks go THROUGH scanlines/background overlays */
+#scanlines,
+canvas#scanlines,
+.background {
+  pointer-events: none !important;
+}
+
 footer{
   position:fixed;
   bottom:10px;
