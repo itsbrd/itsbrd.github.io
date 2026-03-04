@@ -10,6 +10,20 @@ html, body {
   position:fixed; inset:0; z-index:0; pointer-events:none;
   background: radial-gradient(circle at top, #0b0b0b, #000);
 }
+.msg {
+  display:flex;
+  margin:10px 0;
+  opacity:0;
+  transform:translateY(10px) scale(0.98);
+  animation: msgPop .25s ease forwards;
+}
+
+@keyframes msgPop{
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
 
 .topbar{
   position:sticky; top:0; z-index:2;
