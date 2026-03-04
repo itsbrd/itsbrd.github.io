@@ -16,20 +16,28 @@
     PROJECT POOP CHAT
     <span id="online-pill" class="pill">0 online</span>
   </div>
-  <button id="name-btn" class="btn">Set Name</button>
+  <div class="topbar-right">
+    <button id="name-btn" class="btn" type="button">Set Name</button>
+  </div>
 </header>
 
 <main class="wrap">
-  <div id="chat-log" class="chat-log"></div>
+  <section class="main-col">
+    <div id="chat-log" class="chat-log" aria-live="polite"></div>
+    <div id="typing" class="typing" aria-live="polite"></div>
 
-  <div id="typing" class="typing"></div>
+    <form id="chat-form" class="chat-form" autocomplete="off">
+      <input id="chat-input" class="chat-input" type="text" placeholder="type a message…" maxlength="280"/>
+      <button class="btn" type="submit">Send</button>
+    </form>
 
-  <form id="chat-form" class="chat-form">
-    <input id="chat-input" class="chat-input" placeholder="type a message…" maxlength="280"/>
-    <button class="btn" type="submit">Send</button>
-  </form>
+    <div id="chat-status" class="status" aria-live="polite"></div>
+  </section>
 
-  <div id="chat-status" class="status"></div>
+  <aside class="side-col">
+    <div class="side-title">ONLINE</div>
+    <div id="user-list" class="user-list"></div>
+  </aside>
 </main>
 
 <script type="module" src="chat.js"></script>
@@ -46,12 +54,8 @@ function drawScanlines(){
 
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle="rgba(0,0,0,0.55)";
-
-  for(let y=0;y<h;y+=2){
-    ctx.fillRect(0,y,w,1);
-  }
+  for(let y=0;y<h;y+=2){ ctx.fillRect(0,y,w,1); }
 }
-
 window.addEventListener("load",drawScanlines);
 window.addEventListener("resize",drawScanlines);
 </script>
