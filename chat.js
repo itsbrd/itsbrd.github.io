@@ -1,230 +1,157 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/*
-  Project Poop Chat
-  - realtime message updates (postgres_changes)
-  - "online now" counter (presence)
-  - typing indicator (broadcast)
-  - username saved in localStorage
-*/
+const SUPABASE_URL="https://fauoohclvblciogeluiy.supabase.co";
+const SUPABASE_ANON_KEY="PASTE_YOUR_ANON_KEY_HERE";
 
-const SUPABASE_URL = "https://fauoohclvblciogeluiy.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdW9vaGNsdmJsY2lvZ2VsdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MTAzNzgsImV4cCI6MjA4NzE4NjM3OH0.uZlfIOpsf6ezDPfh9LhONsY2DsDQ9RQf2IRec1WXYWE";
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-const hasSupabase = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("PASTE_"));
-const supabase = hasSupabase ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const logEl=document.getElementById("chat-log");
+const formEl=document.getElementById("chat-form");
+const inputEl=document.getElementById("chat-input");
+const nameBtn=document.getElementById("name-btn");
+const typingEl=document.getElementById("typing");
+const onlinePill=document.getElementById("online-pill");
 
-const logEl = document.getElementById("chat-log");
-const formEl = document.getElementById("chat-form");
-const inputEl = document.getElementById("chat-input");
-const nameBtn = document.getElementById("name-btn");
-const statusEl = document.getElementById("chat-status");
-const typingEl = document.getElementById("typing");
-const onlinePill = document.getElementById("online-pill");
-const sendBtn = document.getElementById("send-btn");
+const STORAGE_NAME="pp_chat_name";
 
-const STORAGE_NAME_KEY = "pp_chat_name";
-const STORAGE_ID_KEY = "pp_chat_client_id";
-
-function escapeHtml(str) {
-  return String(str ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[c]));
+function escapeHtml(str){
+return String(str).replace(/[&<>"]/g,c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;"
+}[c]));
 }
 
-function formatTime(iso) {
-  if (!iso) return "";
-  try { return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
-  catch { return ""; }
+function colorFromName(name){
+let hash=0;
+for(let i=0;i<name.length;i++){
+hash=name.charCodeAt(i)+((hash<<5)-hash);
+}
+const hue=hash%360;
+return `hsl(${hue},70%,60%)`;
 }
 
-function getClientId() {
-  let id = localStorage.getItem(STORAGE_ID_KEY) || "";
-  if (!id) {
-    id = (crypto?.randomUUID?.() || String(Math.random()).slice(2)) + "-" + Date.now();
-    localStorage.setItem(STORAGE_ID_KEY, id);
-  }
-  return id;
+function formatTime(t){
+return new Date(t).toLocaleTimeString([],{
+hour:"2-digit",
+minute:"2-digit"
+});
 }
 
-function getName() { return localStorage.getItem(STORAGE_NAME_KEY) || ""; }
-function setName(name) {
-  localStorage.setItem(STORAGE_NAME_KEY, name);
-  nameBtn.textContent = `Name: ${name}`;
-  if (channel) channel.track({ client_id: clientId, name, online_at: new Date().toISOString() }).catch(() => {});
-}
-function ensureName() {
-  let name = getName();
-  if (!name) {
-    name = prompt("Pick a username:", "brd")?.trim() || "";
-    if (!name) name = "anon";
-    setName(name);
-  } else {
-    nameBtn.textContent = `Name: ${name}`;
-  }
-  return name;
+function renderMessageText(text){
+
+if(text.match(/\.(png|jpg|jpeg|gif|webp)$/i)){
+return `<img src="${text}" style="max-width:250px;border-radius:8px;">`;
 }
 
-const recentFingerprints = [];
-function fingerprint(m) {
-  const t = m.created_at ? Math.floor(new Date(m.created_at).getTime() / 2000) : 0;
-  return `${m.name}|${m.text}|${t}`;
+if(text.includes("youtube.com")||text.includes("youtu.be")){
+let id=text.split("v=")[1];
+if(id) id=id.split("&")[0];
+return `<iframe width="260" height="150" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe>`;
 }
 
-function addMessage(msg, { local = false } = {}) {
-  const fp = fingerprint(msg);
-  if (recentFingerprints.includes(fp)) return;
-  recentFingerprints.push(fp);
-  if (recentFingerprints.length > 30) recentFingerprints.shift();
-
-  const row = document.createElement("div");
-  row.className = "msg" + (local ? " local" : "");
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-
-  bubble.innerHTML = `
-    <div class="meta">
-      <span class="name">${escapeHtml(msg.name || "anon")}</span>
-      <span class="time">${escapeHtml(formatTime(msg.created_at))}</span>
-    </div>
-    <div class="text">${escapeHtml(msg.text || "")}</div>
-  `;
-
-  row.appendChild(bubble);
-  logEl.appendChild(row);
-  logEl.scrollTop = logEl.scrollHeight;
+return escapeHtml(text);
 }
 
-let channel = null;
-const clientId = getClientId();
+function addMessage(msg,local=false){
 
-const typingState = new Map();
-let typingTimeout = null;
-let typingLastBroadcast = 0;
+const row=document.createElement("div");
+row.className="msg"+(local?" local":"");
 
-function renderTyping() {
-  const now = Date.now();
-  for (const [id, v] of typingState.entries()) {
-    if (now - v.ts > 2500) typingState.delete(id);
-  }
-  const names = [...typingState.values()].map(v => v.name).filter(n => n && n !== getName());
-  if (names.length === 0) { typingEl.textContent = ""; return; }
-  const list = names.slice(0, 3);
-  const suffix = names.length > 3 ? ` +${names.length - 3} more` : "";
-  typingEl.textContent = `${list.join(", ")}${suffix} typing…`;
+row.innerHTML=`
+<div class="bubble">
+<div class="meta">
+<span class="name" style="color:${colorFromName(msg.name)}">${escapeHtml(msg.name)}</span>
+<span>${formatTime(msg.created_at)}</span>
+</div>
+<div class="text">${renderMessageText(msg.text)}</div>
+</div>
+`;
+
+logEl.appendChild(row);
+logEl.scrollTop=logEl.scrollHeight;
 }
 
-function setOnlineCount(n) { if (onlinePill) onlinePill.textContent = `${n} online`; }
-
-function computeOnlineCount(state) {
-  const unique = new Set();
-  Object.values(state || {}).forEach((metas) => {
-    (metas || []).forEach((m) => unique.add(m?.client_id || JSON.stringify(m || {})));
-  });
-  return unique.size;
+function getName(){
+return localStorage.getItem(STORAGE_NAME)||"";
 }
 
-function safeStatus(msg, clearMs = 1200) {
-  statusEl.textContent = msg || "";
-  if (msg) setTimeout(() => (statusEl.textContent = ""), clearMs);
+function setName(n){
+localStorage.setItem(STORAGE_NAME,n);
+nameBtn.textContent="Name: "+n;
 }
 
-nameBtn.addEventListener("click", () => {
-  const current = getName() || "anon";
-  const next = prompt("Change username:", current)?.trim();
-  if (next) setName(next);
+nameBtn.onclick=()=>{
+const n=prompt("Pick username",getName()||"anon");
+if(n) setName(n);
+};
+
+function ensureName(){
+let n=getName();
+if(!n){
+n=prompt("Pick username","anon")||"anon";
+setName(n);
+}
+return n;
+}
+
+formEl.addEventListener("submit",async e=>{
+e.preventDefault();
+
+const name=ensureName();
+const text=inputEl.value.trim();
+
+if(!text) return;
+
+if(text.startsWith("/")){
+
+if(text.startsWith("/nick")){
+const n=text.split(" ")[1];
+if(n) setName(n);
+return;
+}
+
+if(text==="/clear"){
+logEl.innerHTML="";
+return;
+}
+
+if(text==="/shrug"){
+inputEl.value="¯\\_(ツ)_/¯";
+return;
+}
+
+}
+
+inputEl.value="";
+
+addMessage({name,text,created_at:new Date().toISOString()},true);
+
+await supabase.from("messages").insert({name,text});
 });
 
-inputEl.addEventListener("input", () => {
-  if (!hasSupabase || !channel) return;
-  const now = Date.now();
-  if (now - typingLastBroadcast < 500) return;
-  typingLastBroadcast = now;
+async function init(){
 
-  channel.send({
-    type: "broadcast",
-    event: "typing",
-    payload: { client_id: clientId, name: ensureName(), ts: now }
-  }).catch(() => {});
-});
+ensureName();
 
-formEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = ensureName();
-  const text = inputEl.value.trim();
-  if (!text) return;
+const {data}=await supabase
+.from("messages")
+.select("*")
+.order("created_at",{ascending:true})
+.limit(100);
 
-  inputEl.value = "";
-  inputEl.focus();
+data.forEach(addMessage);
 
-  addMessage({ name, text, created_at: new Date().toISOString() }, { local: true });
+supabase
+.channel("chat")
+.on("postgres_changes",
+{event:"INSERT",schema:"public",table:"messages"},
+payload=>{
+addMessage(payload.new);
+})
+.subscribe();
 
-  if (!hasSupabase) { safeStatus("Local-only (no Supabase key yet)."); return; }
-
-  sendBtn.disabled = true;
-  try {
-    const { error } = await supabase.from("messages").insert({ name, text });
-    if (error) {
-      console.error(error);
-      statusEl.textContent = `Send failed: ${error.message}`;
-    }
-  } finally {
-    sendBtn.disabled = false;
-  }
-});
-
-async function start() {
-  ensureName();
-
-  if (!hasSupabase) {
-    statusEl.textContent = "Add your Supabase anon key in chat.js to enable realtime + storage.";
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending: true })
-    .limit(150);
-
-  if (error) {
-    console.error(error);
-    statusEl.textContent = `Load failed: ${error.message}`;
-    return;
-  }
-
-  logEl.innerHTML = "";
-  data.forEach(addMessage);
-
-  channel = supabase
-    .channel("pp-chat", { config: { presence: { key: clientId } } })
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-      addMessage(payload.new);
-    })
-    .on("presence", { event: "sync" }, () => setOnlineCount(computeOnlineCount(channel.presenceState())))
-    .on("presence", { event: "join" }, () => setOnlineCount(computeOnlineCount(channel.presenceState())))
-    .on("presence", { event: "leave" }, () => setOnlineCount(computeOnlineCount(channel.presenceState())))
-    .on("broadcast", { event: "typing" }, ({ payload }) => {
-      if (!payload?.client_id || payload.client_id === clientId) return;
-      typingState.set(payload.client_id, { name: payload.name || "anon", ts: payload.ts || Date.now() });
-      renderTyping();
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(renderTyping, 600);
-    });
-
-  channel.subscribe(async (s) => {
-    if (s === "SUBSCRIBED") {
-      await channel.track({ client_id: clientId, name: getName() || "anon", online_at: new Date().toISOString() });
-      safeStatus("Connected.");
-    } else if (s === "CHANNEL_ERROR") {
-      statusEl.textContent = "Realtime connection error.";
-    }
-  });
 }
 
-start();
+init();

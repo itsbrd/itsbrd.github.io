@@ -7,51 +7,54 @@
   <link rel="stylesheet" href="chat-style.css" />
 </head>
 <body>
-  <canvas id="scanlines"></canvas>
-  <div class="background"></div>
 
-  <header class="topbar">
-    <div class="title">
-      PROJECT POOP CHAT
-      <span id="online-pill" class="pill" title="People currently connected">0 online</span>
-    </div>
+<canvas id="scanlines"></canvas>
+<div class="background"></div>
 
-    <div class="topbar-actions">
-      <button id="name-btn" class="btn" type="button">Set Name</button>
-    </div>
-  </header>
+<header class="topbar">
+  <div class="title">
+    PROJECT POOP CHAT
+    <span id="online-pill" class="pill">0 online</span>
+  </div>
+  <button id="name-btn" class="btn">Set Name</button>
+</header>
 
-  <main class="wrap">
-    <div id="chat-log" class="chat-log" aria-live="polite"></div>
+<main class="wrap">
+  <div id="chat-log" class="chat-log"></div>
 
-    <div id="typing" class="typing" aria-live="polite"></div>
+  <div id="typing" class="typing"></div>
 
-    <form id="chat-form" class="chat-form" autocomplete="off">
-      <input id="chat-input" class="chat-input" type="text" placeholder="type a message…" maxlength="280" />
-      <button id="send-btn" class="btn" type="submit">Send</button>
-    </form>
+  <form id="chat-form" class="chat-form">
+    <input id="chat-input" class="chat-input" placeholder="type a message…" maxlength="280"/>
+    <button class="btn" type="submit">Send</button>
+  </form>
 
-    <div id="chat-status" class="status"></div>
-  </main>
+  <div id="chat-status" class="status"></div>
+</main>
 
-  <script type="module" src="chat.js"></script>
+<script type="module" src="chat.js"></script>
 
-  <script>
-    function drawScanlines() {
-      const canvas = document.getElementById('scanlines');
-      const ctx = canvas.getContext('2d');
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+<script>
+function drawScanlines(){
+  const canvas=document.getElementById("scanlines");
+  const ctx=canvas.getContext("2d");
+  const w=window.innerWidth;
+  const h=window.innerHeight;
 
-      canvas.width = width;
-      canvas.height = height;
+  canvas.width=w;
+  canvas.height=h;
 
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-      for (let y = 0; y < height; y += 2) ctx.fillRect(0, y, width, 1);
-    }
-    window.addEventListener('load', drawScanlines);
-    window.addEventListener('resize', drawScanlines);
-  </script>
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle="rgba(0,0,0,0.55)";
+
+  for(let y=0;y<h;y+=2){
+    ctx.fillRect(0,y,w,1);
+  }
+}
+
+window.addEventListener("load",drawScanlines);
+window.addEventListener("resize",drawScanlines);
+</script>
+
 </body>
 </html>

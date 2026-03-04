@@ -1,128 +1,127 @@
-html, body {
-  margin:0; height:100%;
-  background:#000; color:#ddd;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+html,body{
+margin:0;
+height:100%;
+background:#000;
+color:#ddd;
+font-family:ui-monospace,Menlo,monospace;
 }
 
-#scanlines { position:fixed; inset:0; z-index:9999; pointer-events:none; }
+#scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:999;
+}
 
 .background{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background: radial-gradient(circle at top, #0b0b0b, #000);
-}
-.msg {
-  display:flex;
-  margin:10px 0;
-  opacity:0;
-  transform:translateY(10px) scale(0.98);
-  animation: msgPop .25s ease forwards;
-}
-
-@keyframes msgPop{
-  to{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
+position:fixed;
+inset:0;
+background:radial-gradient(circle at top,#0b0b0b,#000);
+z-index:0;
 }
 
 .topbar{
-  position:sticky; top:0; z-index:2;
-  display:flex; justify-content:space-between; align-items:center;
-  padding:14px 18px;
-  background: rgba(0,0,0,0.55);
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(8px);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px;
+border-bottom:1px solid rgba(255,255,255,0.1);
+background:rgba(0,0,0,.6);
+position:sticky;
+top:0;
+z-index:2;
 }
-
-.title{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  letter-spacing:0.08em;
-}
-
-.topbar-actions{ display:flex; gap:10px; align-items:center; }
 
 .pill{
-  font-size:12px;
-  opacity:0.9;
-  letter-spacing:0.04em;
-  padding:4px 8px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.16);
-  background: rgba(0,0,0,0.35);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+font-size:12px;
+padding:4px 8px;
+border-radius:999px;
+border:1px solid rgba(255,255,255,0.15);
+margin-left:10px;
 }
 
 .wrap{
-  position:relative; z-index:1;
-  max-width:780px;
-  margin:0 auto;
-  padding:18px;
+max-width:760px;
+margin:auto;
+padding:18px;
+position:relative;
+z-index:1;
 }
-
-.btn{
-  background:#111; color:#ddd;
-  border:1px solid rgba(255,255,255,0.18);
-  padding:10px 12px;
-  border-radius:10px;
-  cursor:pointer;
-}
-.btn:active{ transform: translateY(1px); }
-.btn[disabled]{ opacity:0.55; cursor:not-allowed; }
 
 .chat-log{
-  height:62vh;
-  overflow:auto;
-  padding:14px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.35);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+height:60vh;
+overflow:auto;
+border:1px solid rgba(255,255,255,.1);
+border-radius:12px;
+padding:12px;
+background:rgba(0,0,0,.4);
 }
 
-.msg{ display:flex; margin:10px 0; }
-.msg.local{ justify-content:flex-end; }
+.msg{
+display:flex;
+margin:10px 0;
+opacity:0;
+transform:translateY(10px) scale(.98);
+animation:msgPop .25s ease forwards;
+}
+
+.msg.local{
+justify-content:flex-end;
+}
+
+@keyframes msgPop{
+to{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
 .bubble{
-  max-width:88%;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.55);
-  box-shadow: 0 0 18px rgba(0,255,80,0.08);
+max-width:80%;
+background:rgba(0,0,0,.6);
+padding:10px 12px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.08);
 }
+
 .msg.local .bubble{
-  background: rgba(0,40,12,0.45);
-  border-color: rgba(0,255,100,0.16);
+background:rgba(0,40,12,.45);
 }
+
 .meta{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  font-size:12px;
-  opacity:0.82;
-  margin-bottom:6px;
+font-size:12px;
+opacity:.8;
+display:flex;
+justify-content:space-between;
+margin-bottom:4px;
 }
-.name{ letter-spacing:0.06em; }
-.text{ font-size:15px; white-space:pre-wrap; word-break:break-word; }
 
 .typing{
-  min-height:18px;
-  margin-top:10px;
-  font-size:12px;
-  opacity:0.78;
+margin-top:6px;
+font-size:12px;
+opacity:.7;
 }
 
 .chat-form{
-  display:flex; gap:10px;
-  margin-top:10px;
+display:flex;
+gap:10px;
+margin-top:10px;
 }
+
 .chat-input{
-  flex:1;
-  padding:12px 12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.16);
-  background:#0a0a0a;
-  color:#eee;
+flex:1;
+padding:10px;
+border-radius:8px;
+border:1px solid rgba(255,255,255,.2);
+background:#111;
+color:#eee;
 }
-.status{ margin-top:10px; font-size:12px; opacity:0.75; }
+
+.btn{
+background:#111;
+border:1px solid rgba(255,255,255,.2);
+color:#eee;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+}
