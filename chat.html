@@ -1,60 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project Poop — Chat</title>
-    <link rel="stylesheet" href="chat-style.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Poop — Chat</title>
+  <link rel="stylesheet" href="chat-style.css" />
+</head>
+<body>
+  <canvas id="scanlines"></canvas>
+  <div class="background"></div>
 
-  <body>
-    <canvas id="scanlines"></canvas>
-    <div class="background"></div>
+  <header class="topbar">
+    <div class="title">
+      PROJECT POOP CHAT
+      <span id="online-pill" class="pill" title="People currently connected">0 online</span>
+    </div>
 
-    <header class="topbar">
-      <div class="title">PROJECT POOP CHAT</div>
+    <div class="topbar-actions">
       <button id="name-btn" class="btn" type="button">Set Name</button>
-    </header>
+    </div>
+  </header>
 
-    <main class="wrap">
-      <div id="chat-log" class="chat-log" aria-live="polite"></div>
+  <main class="wrap">
+    <div id="chat-log" class="chat-log" aria-live="polite"></div>
 
-      <form id="chat-form" class="chat-form" autocomplete="off">
-        <input
-          id="chat-input"
-          class="chat-input"
-          type="text"
-          placeholder="type a message…"
-          maxlength="280"
-        />
-        <button id="send-btn" class="btn" type="submit">Send</button>
-      </form>
+    <div id="typing" class="typing" aria-live="polite"></div>
 
-      <div id="chat-status" class="status"></div>
-    </main>
+    <form id="chat-form" class="chat-form" autocomplete="off">
+      <input id="chat-input" class="chat-input" type="text" placeholder="type a message…" maxlength="280" />
+      <button id="send-btn" class="btn" type="submit">Send</button>
+    </form>
 
-    <script type="module" src="chat.js"></script>
+    <div id="chat-status" class="status"></div>
+  </main>
 
-    <script>
-      function drawScanlines() {
-        const canvas = document.getElementById("scanlines");
-        const ctx = canvas.getContext("2d");
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+  <script type="module" src="chat.js"></script>
 
-        canvas.width = width;
-        canvas.height = height;
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "rgba(0,0,0,0.55)";
+      canvas.width = width;
+      canvas.height = height;
 
-        for (let y = 0; y < height; y += 2) {
-          ctx.fillRect(0, y, width, 1);
-        }
-      }
-
-      window.addEventListener("load", drawScanlines);
-      window.addEventListener("resize", drawScanlines);
-    </script>
-  </body>
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      for (let y = 0; y < height; y += 2) ctx.fillRect(0, y, width, 1);
+    }
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
+</body>
 </html>
