@@ -127,6 +127,59 @@
     .home-spacer{
       height: 78px; /* roughly terminal height */
     }
+
+    /* ===== Boot splash ===== */
+    #main-content{
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+
+    #boot-screen{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      transition: opacity 500ms ease;
+      opacity: 1;
+    }
+
+    .boot-panel{
+      width: min(720px, 92vw);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 18px;
+      background: rgba(0,0,0,0.45);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+      padding: 18px 18px;
+      text-align: left;
+    }
+
+    .boot-text{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 0 10px rgba(255,255,255,0.10);
+      white-space: pre-wrap;
+    }
+
+    .boot-line{ margin: 0 0 6px 0; }
+
+    .boot-line.dim{ opacity: 0.72; }
+
+    .boot-cursor{
+      display: inline-block;
+      margin-left: 2px;
+      animation: bootBlink 1s steps(1) infinite;
+      opacity: 0.9;
+    }
+
+    @keyframes bootBlink { 50% { opacity: 0; } }
   </style>
 </head>
 
@@ -134,29 +187,41 @@
   <canvas id="scanlines"></canvas>
   <div class="background"></div>
 
-  <div class="home-wrap">
-    <div>
-      <div class="home-panel">
-        <p class="home-title">Project Poop</p>
-
-        <div class="home-buttons">
-          <a class="home-btn" href="frontpage.html">Music</a>
-          <a class="home-btn" href="chat.html">Chat Room</a>
-          <a href="about.html" class="home-btn">About</a>
-        </div>
+  <!-- Boot splash overlay -->
+  <div id="boot-screen" aria-label="Boot screen">
+    <div class="boot-panel">
+      <div class="boot-text" id="boot-text">
+        <!-- lines injected by JS -->
       </div>
-
-      <div class="home-spacer" aria-hidden="true"></div>
     </div>
   </div>
 
-  <div class="terminal-bar" role="region" aria-label="Terminal">
-    <div class="terminal-inner">
-      <div class="terminal-output" aria-live="polite"></div>
-      <div class="terminal-row">
-        <span class="terminal-prompt">&gt;</span>
-      <input class="terminal-input" type="text" placeholder="type a command (try: help)" autocomplete="off" autocapitalize="off" spellcheck="false" />
-      <span class="terminal-hint">help • music • chat • clear</span>
+  <!-- Main site -->
+  <div id="main-content">
+    <div class="home-wrap">
+      <div>
+        <div class="home-panel">
+          <p class="home-title">Project Poop</p>
+
+          <div class="home-buttons">
+            <a class="home-btn" href="frontpage.html">Music</a>
+            <a class="home-btn" href="chat.html">Chat Room</a>
+            <a href="about.html" class="home-btn">About</a>
+          </div>
+        </div>
+
+        <div class="home-spacer" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="terminal-bar" role="region" aria-label="Terminal">
+      <div class="terminal-inner">
+        <div class="terminal-output" aria-live="polite"></div>
+        <div class="terminal-row">
+          <span class="terminal-prompt">&gt;</span>
+          <input class="terminal-input" type="text" placeholder="type a command (try: help)" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <span class="terminal-hint">help • music • chat • clear</span>
+        </div>
       </div>
     </div>
   </div>
@@ -184,6 +249,74 @@
     window.addEventListener('load', drawScanlines);
     window.addEventListener('resize', drawScanlines);
 
+    // ===== Boot sequence (optional upgrade: lines appear one-by-one) =====
+    function runBootSequence() {
+      const boot = document.getElementById('boot-screen');
+      const bootText = document.getElementById('boot-text');
+      const main = document.getElementById('main-content');
+
+      if (!boot || !bootText || !main) return;
+
+      const lines = [
+        { t: 'PROJECT POOP OS v1.0', cls: '' },
+        { t: 'INITIALIZING SYSTEM...', cls: 'dim' },
+        { t: 'SCANLINES: OK', cls: '' },
+        { t: 'AUDIO ENGINE: OK', cls: '' },
+        { t: 'LOADING INTERFACE...', cls: 'dim' },
+        { t: 'WELCOME.', cls: '' }
+      ];
+
+      bootText.innerHTML = '';
+
+      let i = 0;
+      const baseDelay = 240;    // time between lines
+      const firstDelay = 120;   // slight pause before first line
+
+      function addLine(lineObj) {
+        const div = document.createElement('div');
+        div.className = 'boot-line' + (lineObj.cls ? ' ' + lineObj.cls : '');
+        div.textContent = lineObj.t;
+        bootText.appendChild(div);
+      }
+
+      function addCursor() {
+        const cursorLine = document.createElement('div');
+        cursorLine.className = 'boot-line dim';
+        cursorLine.innerHTML = 'ready_<span class="boot-cursor">█</span>';
+        bootText.appendChild(cursorLine);
+      }
+
+      function step() {
+        if (i < lines.length) {
+          addLine(lines[i]);
+          i++;
+          setTimeout(step, baseDelay);
+          return;
+        }
+
+        addCursor();
+
+        // fade into main
+        setTimeout(() => {
+          boot.style.opacity = '0';
+          main.style.opacity = '1';
+
+          // remove boot overlay after fade
+          setTimeout(() => {
+            boot.style.display = 'none';
+          }, 520);
+        }, 520);
+      }
+
+      // Start with main hidden, boot visible
+      main.style.opacity = '0';
+      boot.style.display = 'flex';
+      boot.style.opacity = '1';
+
+      setTimeout(step, firstDelay);
+    }
+
+    window.addEventListener('load', runBootSequence);
 
     // ===== Terminal (lightweight v1) =====
     const termInput = document.querySelector('.terminal-input');
@@ -224,7 +357,6 @@
 
       const [cmd, ...rest] = input.split(/\s+/);
       const c = (cmd || '').toLowerCase();
-      const arg = rest.join(' ');
 
       switch (c){
         case 'help':
@@ -277,7 +409,6 @@
           e.preventDefault();
           histIdx = Math.max(0, histIdx - 1);
           termInput.value = history[histIdx] ?? '';
-          // move cursor to end
           termInput.setSelectionRange(termInput.value.length, termInput.value.length);
         } else if (e.key === 'ArrowDown'){
           if (!history.length) return;
@@ -290,7 +421,6 @@
         }
       });
     }
-
   </script>
 </body>
 </html>
