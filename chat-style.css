@@ -212,6 +212,34 @@ html,body{
   font-size:13px;
 }
 
+/* ---- Voice UI ---- */
+.topbar-right{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.btn-on{
+  border-color: rgba(80,255,120,.55);
+  box-shadow: 0 0 14px rgba(80,255,120,.18);
+}
+
+.side-divider{
+  height:1px;
+  margin:12px 0;
+  background: rgba(255,255,255,.10);
+}
+
+.dot-voice{
+  background: rgba(80,180,255,.95);
+  box-shadow: 0 0 10px rgba(80,180,255,.35);
+}
+
+.dot-self{
+  background: rgba(255,220,80,.95);
+  box-shadow: 0 0 10px rgba(255,220,80,.35);
+}
+
 .dot{
   width:8px;
   height:8px;
