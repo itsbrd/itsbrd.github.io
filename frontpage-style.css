@@ -199,6 +199,13 @@ body{
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
+.main-container {
+  max-width: 700px;
+  margin: auto;
+  text-align: center;
+  padding-top: 120px;
+}
+
 .playbtn{
   appearance:none;
   -webkit-appearance:none;
@@ -225,6 +232,8 @@ footer{
   font-size:14px;
   letter-spacing:0.02em;
 }
+
+
 
 /* mobile tweaks */
 @media (max-width: 480px){
