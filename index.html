@@ -4,13 +4,156 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project Poop</title>
+  <link rel="stylesheet" href="frontpage-style.css" />
   <style>
-    body{margin:0;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui}
-    a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,0.2);padding:14px 18px;border-radius:12px}
-    a:hover{border-color:rgba(255,255,255,0.5)}
+    /* Home screen layout (keeps the same CRT/background vibe as the music page) */
+    .home-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .home-panel{
+      width:min(560px, 92vw);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      background:rgba(0,0,0,0.55);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.55);
+      padding:22px;
+      position:relative;
+    }
+    .home-title{
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      opacity:0.9;
+      margin:0 0 14px 0;
+      font-size:14px;
+    }
+    .home-buttons{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .home-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(0,0,0,0.35);
+      color:var(--fg);
+      text-decoration:none;
+      font-weight:600;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+      min-width: 140px;
+    }
+    .home-btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(0,0,0,0.5);
+    }
+
+    /* Terminal prompt (placeholder for the command system) */
+    .terminal-bar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(0,0,0,0.72);
+      border-top:1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index:5;
+    }
+    .terminal-inner{
+      max-width: 900px;
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: var(--fg);
+    }
+    .terminal-prompt{
+      opacity:0.9;
+      user-select:none;
+    }
+    .terminal-input{
+      flex:1;
+      background: transparent;
+      border: 0;
+      outline: none;
+      color: var(--fg);
+      font-size: 14px;
+      padding: 6px 4px;
+    }
+    .terminal-hint{
+      opacity:0.55;
+      font-size:12px;
+      margin-left:auto;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    /* Give the centered panel breathing room above the terminal */
+    .home-spacer{
+      height: 78px; /* roughly terminal height */
+    }
   </style>
 </head>
+
 <body>
-  <a href="frontpage.html">Enter Project Poop</a>
+  <canvas id="scanlines"></canvas>
+  <div class="background"></div>
+
+  <div class="home-wrap">
+    <div>
+      <div class="home-panel">
+        <p class="home-title">Project Poop</p>
+
+        <div class="home-buttons">
+          <a class="home-btn" href="frontpage.html">Music</a>
+          <a class="home-btn" href="chat.html">Chat Room</a>
+        </div>
+      </div>
+
+      <div class="home-spacer" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="terminal-bar" role="region" aria-label="Terminal">
+    <div class="terminal-inner">
+      <span class="terminal-prompt">&gt;</span>
+      <input class="terminal-input" type="text" placeholder="type a command (coming soon)" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <span class="terminal-hint">help • music • chat</span>
+    </div>
+  </div>
+
+  <script>
+    // Scanlines (same simple approach as your music page)
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+
+      for (let y = 0; y < height; y += 2) {
+        ctx.fillRect(0, y, width, 1);
+      }
+    }
+
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
 </body>
 </html>
