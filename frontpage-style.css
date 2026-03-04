@@ -274,6 +274,52 @@ body{
   background: rgba(0,0,0,0.5);
 }
 
+/* Top-right account corner */
+.pp-topright {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000; /* above most UI */
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Reuse your button vibe */
+.pp-topright a,
+.pp-topright button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.pp-topright a:hover,
+.pp-topright button:hover {
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.58);
+}
+
+/* Optional tiny label style if we show email later */
+.pp-topright .pp-user {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  opacity: 0.85;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.35);
+}
+
 .controls{
   margin-top:12px;
   display:flex;
