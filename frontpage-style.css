@@ -100,6 +100,17 @@ body{
   color:#ff2d55;
 }
 
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s steps(1) infinite;
+  opacity: 0.9;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 /* scanlines */
 #scanlines{
   position:fixed;
