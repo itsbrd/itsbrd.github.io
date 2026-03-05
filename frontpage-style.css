@@ -411,6 +411,29 @@ canvas#scanlines,
   background: rgba(0,0,0,0.55);
 }
 
+/* ===== Mobile-only tweaks (strong overrides) ===== */
+@media (max-width: 700px) {
+  /* Center the panel contents */
+  .home-panel { text-align: center; }
+
+  /* Make buttons a true centered list */
+  .home-buttons {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Make each button look like your current "list style" but centered */
+  .home-btn {
+    width: min(320px, 90vw);
+  }
+
+  /* Hide the bottom hint text on mobile ONLY */
+  .terminal-hint {
+    display: none !important;
+  }
+}
+
 footer{
   position:fixed;
   bottom:10px;
