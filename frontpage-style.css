@@ -362,6 +362,55 @@ canvas#scanlines,
   pointer-events: none !important;
 }
 
+/* ===== Account menu (top-right) ===== */
+.pp-account-menu{
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.65);
+  z-index: 10001;
+}
+
+.pp-account-menu-inner{
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pp-account-menu-header{
+  margin: 0 0 2px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.pp-account-item{
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  cursor: pointer;
+}
+
+.pp-account-item:hover{
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.55);
+}
+
 footer{
   position:fixed;
   bottom:10px;
