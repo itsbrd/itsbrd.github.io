@@ -6,15 +6,12 @@
   <title>Account | Project Poop</title>
   <link rel="stylesheet" href="frontpage-style.css" />
 </head>
-<script type="module">
-import { refreshAccountButton } from "./auth-ui.js";
-refreshAccountButton();
-</script>
+
 <body>
   <canvas id="scanlines"></canvas>
   <div class="background"></div>
 
-  <!-- top-right account corner (optional but recommended for consistency) -->
+  <!-- Top-right account corner -->
   <div class="pp-topright">
     <a id="ppAccountBtn" href="auth.html">Log in</a>
   </div>
@@ -61,7 +58,6 @@ refreshAccountButton();
   </div>
 
   <script>
-    // reuse your scanlines approach
     function drawScanlines() {
       const canvas = document.getElementById('scanlines');
       if (!canvas) return;
@@ -80,6 +76,7 @@ refreshAccountButton();
 
   <script type="module">
     import { supabase } from "./supabaseClient.js";
+    import { refreshAccountButton } from "./auth-ui.js";
 
     const statusLine = document.getElementById("statusLine");
     const msgLine = document.getElementById("msgLine");
@@ -88,8 +85,6 @@ refreshAccountButton();
     const signinForm = document.getElementById("signinForm");
     const signoutBtn = document.getElementById("signoutBtn");
 
-    const topRightBtn = document.getElementById("ppAccountBtn");
-
     function setMsg(text, isError=false){
       msgLine.textContent = text || "";
       msgLine.style.opacity = text ? "1" : "0.6";
@@ -97,12 +92,10 @@ refreshAccountButton();
     }
 
     function isEmailConfirmed(user){
-      // Supabase uses email_confirmed_at; confirmed_at exists in some contexts
       return !!(user?.email_confirmed_at || user?.confirmed_at);
     }
 
     async function exchangeCodeIfPresent(){
-      // Handles email-confirm redirect links like ?code=...
       const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
       if (!code) return;
@@ -115,13 +108,11 @@ refreshAccountButton();
         return;
       }
 
-      // clean up URL (remove ?code=...)
       url.searchParams.delete("code");
       window.history.replaceState({}, document.title, url.toString());
     }
 
     async function getProfile(userId){
-      // This requires your Supabase table: public.profiles (id uuid PK, username text, etc.)
       const { data, error } = await supabase
         .from("profiles")
         .select("username")
@@ -129,65 +120,42 @@ refreshAccountButton();
         .maybeSingle();
 
       if (error) throw error;
-      return data; // may be null
+      return data;
     }
 
-    async function refreshSessionUI(){
+    async function routeIfReady(){
       const { data, error } = await supabase.auth.getSession();
       if (error){
         statusLine.textContent = "status: error reading session";
         setMsg(error.message, true);
-        if (topRightBtn){
-          topRightBtn.textContent = "Log in";
-          topRightBtn.href = "auth.html";
-        }
         return;
       }
 
-      const session = data.session;
-      const user = session?.user;
-
+      const user = data?.session?.user;
       if (!user){
         statusLine.textContent = "status: signed out";
         setMsg("");
-        if (topRightBtn){
-          topRightBtn.textContent = "Log in";
-          topRightBtn.href = "auth.html";
-        }
         return;
       }
 
-      // If they're signed in, check whether they need setup
       statusLine.textContent = `status: signed in as ${user.email}`;
 
-      // If not confirmed, tell them and keep them here
       if (!isEmailConfirmed(user)){
         setMsg("Check your email and confirm your account to continue.");
-        if (topRightBtn){
-          topRightBtn.textContent = "Log in";
-          topRightBtn.href = "auth.html";
-        }
         return;
       }
 
-      // Confirmed: if username missing, force setup
       try{
         const profile = await getProfile(user.id);
-
         if (!profile?.username){
           setMsg("Email confirmed. Redirecting to setup…");
           setTimeout(() => window.location.href = "setup.html", 300);
           return;
         }
 
-        // Username exists: show it in top-right and optionally bounce home
-        if (topRightBtn){
-          topRightBtn.textContent = profile.username;
-          topRightBtn.href = "setup.html";
-        }
-        setMsg("You're all set.");
+        setMsg("Welcome back. Redirecting…");
+        setTimeout(() => window.location.href = "index.html", 300);
       } catch (e){
-        // If profiles table isn't ready, at least don't hang
         setMsg("Profile check failed: " + (e?.message || String(e)), true);
       }
     }
@@ -204,7 +172,6 @@ refreshAccountButton();
           email,
           password,
           options: {
-            // IMPORTANT: add this URL in Supabase Auth → URL Configuration → Additional Redirect URLs
             emailRedirectTo: "https://projectpoop.org/setup.html"
           }
         });
@@ -214,8 +181,7 @@ refreshAccountButton();
           return;
         }
 
-        setMsg("Sign up sent. Check your email to confirm, then you'll be taken to setup.");
-        await refreshSessionUI();
+        setMsg("Sign up sent. Check your email to confirm.");
       } catch (err){
         setMsg("Sign up failed: " + (err?.message || String(err)), true);
       }
@@ -235,8 +201,9 @@ refreshAccountButton();
           return;
         }
 
-        setMsg("Signed in.");
-        await refreshSessionUI();
+        setMsg("Signed in. Verifying…");
+        await refreshAccountButton();
+        await routeIfReady();
       } catch (err){
         setMsg("Sign in failed: " + (err?.message || String(err)), true);
       }
@@ -250,15 +217,14 @@ refreshAccountButton();
         return;
       }
       setMsg("Signed out.");
-      await refreshSessionUI();
+      await refreshAccountButton();
+      statusLine.textContent = "status: signed out";
     });
 
-    // Run: handle email-confirm redirect, then refresh
+    // init
     await exchangeCodeIfPresent();
-
-    // keep UI synced if auth state changes
-    supabase.auth.onAuthStateChange(() => refreshSessionUI());
-    await refreshSessionUI();
+    await refreshAccountButton();
+    await routeIfReady();
   </script>
 </body>
 </html>
