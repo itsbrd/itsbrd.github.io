@@ -281,6 +281,7 @@ refreshAccountButton();
     window.addEventListener('load', drawScanlines);
     window.addEventListener('resize', drawScanlines);
 
+let taneishaAudio = null;
     // ===== Boot sequence (optional upgrade: lines appear one-by-one) =====
     function runBootSequence() {
       const boot = document.getElementById('boot-screen');
