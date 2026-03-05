@@ -24,6 +24,8 @@ function formatTime(t){
 // Single shared audio element to avoid iOS Safari weirdness with multiple audio tags
 const audio = new Audio();
 audio.preload = 'metadata';
+audio.playsInline = true;
+audio.setAttribute('playsinline', '');
 
 let currentButton = null;
 let currentProgress = null;
