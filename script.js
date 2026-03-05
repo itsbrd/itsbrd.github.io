@@ -78,7 +78,7 @@ async function fetchSongsFromGitHub(){
       return {
         order,
         title: prettifyTitle(x.name),      // display title (number removed)
-        file: `${SONGS_DIR}/${x.name}`     // actual file path keeps the number
+        file: `${SONGS_DIR}/${encodeURIComponent(x.name)}`     // actual file path keeps the number
       };
     })
     // Sort by leading number first, then fallback alphabetical
