@@ -183,6 +183,11 @@
   </style>
 </head>
 
+  <script type="module">
+import { refreshAccountButton } from "./auth-ui.js";
+refreshAccountButton();
+</script>
+
 <body>
   
   <canvas id="scanlines"></canvas>
@@ -191,10 +196,6 @@
   <a id="ppAccountBtn" href="auth.html">Log in</a>
 </div>
 
-  <script type="module">
-  import { refreshAccountButton } from "./auth-ui.js";
-  refreshAccountButton();
-</script>
   
   <div class="background"></div>
 
