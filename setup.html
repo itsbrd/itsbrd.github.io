@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup | Project Poop</title>
+  <link rel="stylesheet" href="frontpage-style.css" />
+</head>
+<body>
+  <canvas id="scanlines"></canvas>
+  <div class="background"></div>
+
+  <div class="pp-topright">
+    <a id="ppAccountBtn" href="auth.html">Log in</a>
+  </div>
+
+  <div class="main-container">
+    <h1>SETUP</h1>
+
+    <div class="terminal-box">
+      <div class="terminal-line">PROJECT POOP OS // USER SETUP</div>
+      <div class="terminal-line">--------------------------------</div>
+
+      <div class="terminal-line subtle" id="statusLine">status: initializing…</div>
+      <div style="height: 14px;"></div>
+
+      <form id="setupForm" style="display:none;">
+        <input id="username" class="terminal-input-like" type="text" placeholder="choose a username" required />
+        <input id="displayName" class="terminal-input-like" type="text" placeholder="display name (optional)" />
+        <button class="enter-button" type="submit">Save</button>
+      </form>
+
+      <div style="height: 12px;"></div>
+      <div class="terminal-line subtle" id="msgLine"></div>
+
+      <div style="height: 16px;"></div>
+      <a href="index.html" class="enter-button">Return Home</a>
+    </div>
+  </div>
+
+  <script>
+    function drawScanlines() {
+      const canvas = document.getElementById('scanlines');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      for (let y = 0; y < canvas.height; y += 2) ctx.fillRect(0, y, canvas.width, 1);
+    }
+    window.addEventListener('load', drawScanlines);
+    window.addEventListener('resize', drawScanlines);
+  </script>
+
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
+
+    const statusLine = document.getElementById("statusLine");
+    const msgLine = document.getElementById("msgLine");
+    const setupForm = document.getElementById("setupForm");
+    const usernameEl = document.getElementById("username");
+    const displayNameEl = document.getElementById("displayName");
+
+    function setMsg(text, isError=false){
+      msgLine.textContent = text || "";
+      msgLine.style.color = isError ? "rgba(255,120,120,0.95)" : "rgba(255,255,255,0.8)";
+    }
+
+    function isEmailConfirmed(user){
+      // depending on project settings, one of these is usually set when confirmed
+      return !!(user?.email_confirmed_at || user?.confirmed_at);
+    }
+
+    async function exchangeCodeIfPresent(){
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (!code) return;
+
+      statusLine.textContent = "status: finalizing sign-in…";
+
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error){
+        setMsg("Code exchange failed: " + error.message, true);
+        return;
+      }
+
+      // Clean URL (remove ?code=...)
+      url.searchParams.delete("code");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+
+    async function getProfile(userId){
+      // Requires you to create a profiles table (Step 2 below)
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, display_name")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data; // can be null
+    }
+
+    async function ensureSessionAndMaybeShowForm(){
+      const { data, error } = await supabase.auth.getSession();
+      if (error){
+        statusLine.textContent = "status: error";
+        setMsg(error.message, true);
+        return;
+      }
+
+      const session = data.session;
+      if (!session?.user){
+        statusLine.textContent = "status: signed out";
+        setMsg("Please log in first.", true);
+        return;
+      }
+
+      const user = session.user;
+
+      if (!isEmailConfirmed(user)){
+        statusLine.textContent = "status: email not confirmed";
+        setMsg("Check your email and confirm your account, then come back.", true);
+        return;
+      }
+
+      statusLine.textContent = "status: checking profile…";
+
+      let profile = null;
+      try {
+        profile = await getProfile(user.id);
+      } catch (e){
+        statusLine.textContent = "status: profile error";
+        setMsg(e?.message || String(e), true);
+        return;
+      }
+
+      if (profile?.username){
+        // Done — send them home (or wherever you want)
+        statusLine.textContent = `status: welcome, ${profile.username}`;
+        setMsg("Profile already set. Redirecting…");
+        setTimeout(() => window.location.href = "index.html", 700);
+        return;
+      }
+
+      // Needs setup
+      statusLine.textContent = "status: choose a username";
+      setupForm.style.display = "block";
+    }
+
+    setupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setMsg("");
+
+      const username = usernameEl.value.trim();
+      const display_name = displayNameEl.value.trim() || null;
+
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)){
+        setMsg("Username must be 3–20 chars, letters/numbers/underscore only.", true);
+        return;
+      }
+
+      const { data: sess } = await supabase.auth.getSession();
+      const user = sess?.session?.user;
+      if (!user){
+        setMsg("Session missing. Please log in again.", true);
+        return;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, username, display_name }, { onConflict: "id" });
+
+      if (error){
+        setMsg(error.message, true);
+        return;
+      }
+
+      setMsg("Saved! Redirecting…");
+      setTimeout(() => window.location.href = "index.html", 700);
+    });
+
+    // Run setup flow
+    await exchangeCodeIfPresent();
+    await ensureSessionAndMaybeShowForm();
+  </script>
+</body>
+</html>
