@@ -406,12 +406,26 @@ case 'taneisha':
   printLine('Playing taneisha.mp3…');
 
   if (!taneishaAudio) {
-    taneishaAudio = new Audio('songs/taneisha.mp3');
+    taneishaAudio = new Audio('taneisha.mp3');
   }
 
   taneishaAudio.currentTime = 0;
   taneishaAudio.play().catch(() => {
-    printLine('Audio blocked by browser. Tap the page first.');
+    printLine('Audio blocked. Tap the page first.');
+  });
+
+  break;
+
+case 'checkoutthisnewsongimade':
+  printLine('ok check this out…');
+
+  if (!bussinAudio) {
+    bussinAudio = new Audio('bussin.mp3');
+  }
+
+  bussinAudio.currentTime = 0;
+  bussinAudio.play().catch(() => {
+    printLine('Audio blocked. Tap the page first.');
   });
 
   break;
