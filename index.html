@@ -200,6 +200,21 @@
     display: none !important;
   }
 }
+
+/* ===== Mobile terminal fixes ===== */
+@media (max-width: 700px) {
+  .terminal-input {
+    font-size: 16px !important; /* prevents iPhone auto-zoom on focus */
+  }
+
+  .terminal-bar {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .terminal-inner {
+    max-width: 100%;
+  }
+}
   </style>
 </head>
 
