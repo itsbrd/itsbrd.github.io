@@ -11,6 +11,10 @@
   font-weight: normal;
   font-style: normal;
 }
+* {
+  font-family: "Pix32", monospace !important;
+}
+
 
 html,body{height:100%}
 
