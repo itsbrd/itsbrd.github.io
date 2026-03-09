@@ -21,14 +21,42 @@ html,body{height:100%}
 body{
   margin:0;
   background:#000;
-  color:var(--fg);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#e6e6e6;
+  font-family:"Pix32", monospace;
   overflow-x:hidden;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
+
+  text-shadow:
+    0 0 2px rgba(255,255,255,0.25),
+    0 0 6px rgba(255,255,255,0.12);
+
+  -webkit-font-smoothing:none;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeSpeed;
+}
+.terminal-line,
+.terminal-input,
+.boot-text {
+  text-shadow:
+  0 0 2px rgba(255,255,255,0.3),
+  0 0 8px rgba(255,255,255,0.15),
+  0 0 14px rgba(255,255,255,0.08);
+}
+.home-btn:hover {
+  text-shadow:
+    0 0 4px rgba(255,255,255,0.6),
+    0 0 10px rgba(255,255,255,0.25);
+}
+@keyframes crtFlicker {
+  0% { opacity: 1; }
+  97% { opacity: 1; }
+  98% { opacity: 0.98; }
+  99% { opacity: 1; }
+  100% { opacity: 0.99; }
 }
 
+body {
+  animation: crtFlicker 6s infinite;
+}
 /* background image */
 .background{
   position:fixed;
