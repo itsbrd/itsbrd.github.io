@@ -1,4 +1,4 @@
-/* Dark CRT look */
+ho/* Dark CRT look */
 :root{
   --fg:#eaeaea;
   --muted:#b9b9b9;
@@ -34,8 +34,15 @@ body{
   -moz-osx-font-smoothing:grayscale;
   text-rendering:optimizeSpeed;
 }
-.terminal-line,
-.terminal-input,
+
+.terminal-line{
+  font-size:16px;
+}
+
+.terminal-input{
+  font-size:18px;
+}
+
 .boot-text {
   text-shadow:
   0 0 2px rgba(255,255,255,0.3),
@@ -468,9 +475,28 @@ canvas#scanlines,
   }
 
   /* Make each button look like your current "list style" but centered */
-  .home-btn {
-    width: min(320px, 90vw);
-  }
+  .home-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+
+  padding:18px 28px;       /* bigger button */
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(0,0,0,0.35);
+
+  color:#e6e6e6;
+  text-decoration:none;
+
+  font-size:20px;          /* pixel font friendly size */
+  line-height:1;
+
+  min-width:200px;
+
+  transition:transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
 
   /* Hide the bottom hint text on mobile ONLY */
   .terminal-hint {
